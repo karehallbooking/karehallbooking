@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/authMiddleware';
 import { UserService } from '../services/userService';
 import { ApiResponse, User } from '../types';
+import { sendMail } from '../utils/mailer';
+import { welcomeEmail } from '../utils/emailTemplates';
 
 const router = Router();
 
@@ -44,6 +46,20 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       department: department || '',
       role: 'user', // Default role
     });
+
+    // Send welcome email
+    try {
+      await sendMail({
+        to: email,
+        subject: 'Welcome to KARE Hall Booking — Let\'s get started',
+        html: welcomeEmail({ name }),
+        text: `Welcome to KARE Hall Booking!\n\nHi ${name}, we're excited to have you on board. Booking halls is now simple and fast.\n\n1) Create a booking with your event details\n2) Track the status from your dashboard\n3) Conduct your event with confidence\n\nBook a Hall: https://karehallbooking.netlify.app/book\n\nQuestions? Contact us at ${process.env.ADMIN_EMAIL || 'karehallbooking@gmail.com'}`
+      });
+      console.log('✅ Welcome email sent to:', email);
+    } catch (emailError: any) {
+      console.error('❌ Welcome email failed:', emailError?.message || emailError);
+      // Don't fail registration if email fails
+    }
 
     res.status(201).json({
       success: true,

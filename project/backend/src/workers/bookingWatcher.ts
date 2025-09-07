@@ -69,7 +69,7 @@ export function startBookingWatcher(): void {
                   to: userEmail,
                   subject: `We received your booking request — ${hallName}`,
                   html: bookingReceivedUser(emailData),
-                  text: `We received your booking request for ${hallName}. View: ${(process.env.PUBLIC_SITE_URL || '')}/my-bookings/${bookingId}`
+                  text: `We received your booking request for ${hallName}. View: https://karehallbooking.netlify.app/my-bookings/${bookingId}`
                 });
               } catch (e: any) {
                 console.error('❌ User booking mail failed:', e?.message || e);
@@ -129,14 +129,14 @@ export function startBookingWatcher(): void {
                 to: userEmail,
                 subject: `Your booking is approved ✅ — ${hallName}`,
                 html: bookingApproved(emailData),
-                text: `Your booking is approved. View: ${(process.env.PUBLIC_SITE_URL || '')}/my-bookings/${bookingId}`
+                text: `Your booking is approved. View: https://karehallbooking.netlify.app/my-bookings/${bookingId}`
               });
             } else {
               await sendMail({
                 to: userEmail,
                 subject: `Update on your booking request — ${hallName}`,
                 html: bookingRejected(emailData),
-                text: `Your booking was not approved.${emailData.rejectionReason ? ' Reason: ' + emailData.rejectionReason : ''} Try again: ${(process.env.PUBLIC_SITE_URL || '')}/book`
+                text: `Your booking was not approved.${emailData.rejectionReason ? ' Reason: ' + emailData.rejectionReason : ''} Try again: https://karehallbooking.netlify.app/book`
               });
             }
             console.log(`✅ Booking ${bookingId} status email sent (${current})`);

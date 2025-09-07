@@ -181,7 +181,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response): Pro
             to: newBooking.userEmail,
             subject: `We received your booking request — ${hallNameDisplay}`,
             html: bookingReceivedUser(emailData),
-            text: `We received your booking request for ${hallNameDisplay}. View: ${(process.env.PUBLIC_SITE_URL || '')}/my-bookings/${newBooking.bookingId}`
+            text: `We received your booking request for ${hallNameDisplay}. View: https://karehallbooking.netlify.app/my-bookings/${newBooking.bookingId}`
           });
         } catch (e: any) {
           console.error('❌ User booking mail failed:', e?.message || e);

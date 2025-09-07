@@ -8,7 +8,7 @@ We're excited to have you on board.
 2) Track the status from your dashboard
 3) Conduct your event with confidence
 
-Book a Hall: {{PUBLIC_SITE_URL}}/book
+Book a Hall: https://karehallbooking.netlify.app/book
 
 Questions? Contact us at {{ADMIN_EMAIL}}
 
