@@ -1,0 +1,224 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser,
+  signInWithPopup,
+  GoogleAuthProvider
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { auth, db, collections } from '../config/firebase';
+import { User } from '../types';
+
+interface AuthContextType {
+  currentUser: User | null;
+  firebaseToken: string | null;
+  login: (email: string, password: string) => Promise<User>;
+  loginWithGoogle: () => Promise<User>;
+  register: (userData: Omit<User, 'uid' | 'role'> & { password: string }) => Promise<User>;
+  logout: () => void;
+  loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [firebaseToken, setFirebaseToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        // Get Firebase token
+        try {
+          const token = await firebaseUser.getIdToken();
+          setFirebaseToken(token);
+          localStorage.setItem('firebaseToken', token);
+        } catch (error) {
+          console.error('Error getting Firebase token:', error);
+        }
+
+        // Get user data from Firestore
+        try {
+          const userDoc = await getDoc(doc(db, collections.users, firebaseUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data() as User;
+            setCurrentUser({
+              ...userData,
+              uid: firebaseUser.uid
+            });
+          } else {
+            // User document doesn't exist, create it
+            const isAdmin = firebaseUser.email === 'karehallbooking@gmail.com';
+            const newUser: User = {
+              uid: firebaseUser.uid,
+              name: isAdmin ? 'KARE Hall Admin' : (firebaseUser.displayName || 'User'),
+              email: firebaseUser.email || '',
+              mobile: isAdmin ? '9876543210' : '',
+              department: isAdmin ? 'Administration' : '',
+              role: isAdmin ? 'admin' : 'user'
+            };
+            await setDoc(doc(db, collections.users, firebaseUser.uid), {
+              ...newUser,
+              createdAt: new Date(),
+              lastLogin: new Date()
+            });
+            setCurrentUser(newUser);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
+        setFirebaseToken(null);
+        localStorage.removeItem('firebaseToken');
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const login = async (email: string, password: string): Promise<User> => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Get user data from Firestore
+      const userDoc = await getDoc(doc(db, collections.users, firebaseUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as User;
+        const user: User = {
+          ...userData,
+          uid: firebaseUser.uid
+        };
+        
+        // Update last login
+        await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+          lastLogin: new Date()
+        });
+        
+        return user;
+      } else {
+        throw new Error('User profile not found. Please contact administrator.');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw new Error(error.message || 'Login failed');
+    }
+  };
+
+  const loginWithGoogle = async (): Promise<User> => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+      
+      // Check if user document exists
+      const userDoc = await getDoc(doc(db, collections.users, firebaseUser.uid));
+      
+      if (userDoc.exists()) {
+        // User exists, update last login
+        const userData = userDoc.data() as User;
+        const user: User = {
+          ...userData,
+          uid: firebaseUser.uid
+        };
+        
+        await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+          lastLogin: new Date()
+        });
+        
+        return user;
+      } else {
+        // New user, create profile
+        const isAdmin = firebaseUser.email === 'karehallbooking@gmail.com';
+        const newUser: User = {
+          uid: firebaseUser.uid,
+          name: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          mobile: '',
+          department: '',
+          role: isAdmin ? 'admin' : 'user'
+        };
+        
+        await setDoc(doc(db, collections.users, firebaseUser.uid), {
+          ...newUser,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
+        
+        return newUser;
+      }
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      throw new Error(error.message || 'Google login failed');
+    }
+  };
+
+  const register = async (userData: Omit<User, 'uid' | 'role'> & { password: string }): Promise<User> => {
+    try {
+      const { password, ...userInfo } = userData;
+      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Check if this is the admin email
+      const isAdmin = userData.email === 'karehallbooking@gmail.com';
+      
+      const newUser: User = {
+        ...userInfo,
+        uid: firebaseUser.uid,
+        role: isAdmin ? 'admin' : 'user'
+      };
+      
+      // Save user data to Firestore
+      await setDoc(doc(db, collections.users, firebaseUser.uid), {
+        ...newUser,
+        createdAt: new Date(),
+        lastLogin: new Date()
+      });
+      
+      return newUser;
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      throw new Error(error.message || 'Registration failed');
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const value = {
+    currentUser,
+    firebaseToken,
+    login,
+    loginWithGoogle,
+    register,
+    logout,
+    loading
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}

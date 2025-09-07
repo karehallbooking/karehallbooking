@@ -1,0 +1,22 @@
+{
+  "name": "karehall-functions",
+  "private": true,
+  "engines": { "node": "20" },
+  "scripts": {
+    "build": "tsc --noEmit || echo 'JS project'",
+    "lint": "eslint . || echo 'no eslint'",
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run serve",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^5.0.1",
+    "nodemailer": "^6.9.13",
+    "mustache": "^4.2.0",
+    "dotenv": "^16.4.5"
+  }
+}
+
+

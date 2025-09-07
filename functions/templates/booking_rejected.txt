@@ -1,0 +1,17 @@
+Booking Request Update
+
+We’re sorry to inform you that your booking request could not be accommodated.
+
+Reason: {{rejectionReason}}
+
+Hall: {{hall}}
+Start: {{startDateTime}}
+End: {{endDateTime}}
+Purpose: {{purpose}}
+Attendees: {{peopleCount}}
+
+Try another hall: {{PUBLIC_SITE_URL}}/book
+
+Questions? Contact {{ADMIN_EMAIL}}
+
+

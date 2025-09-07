@@ -1,0 +1,15 @@
+Welcome to KARE Hall Booking
+
+Hi {{name}},
+
+We're excited to have you on board.
+
+1) Create a booking with your event details
+2) Track the status from your dashboard
+3) Conduct your event with confidence
+
+Book a Hall: {{PUBLIC_SITE_URL}}/book
+
+Questions? Contact us at {{ADMIN_EMAIL}}
+
+

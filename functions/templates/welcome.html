@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to KARE Hall Booking</title>
+    <style>
+      /* Inline-safe basic styles */
+      .container { max-width:600px;margin:0 auto;background:#ffffff;color:#1a1a1a;font-family:Arial,Helvetica,sans-serif;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb; }
+      .header { background:#154D71;color:#ffffff;padding:24px;text-align:center; }
+      .brand { font-size:20px;font-weight:bold;letter-spacing:0.5px; }
+      .content { padding:24px; }
+      .h1 { font-size:22px;margin:0 0 12px 0;color:#154D71; }
+      .muted { color:#4b5563;line-height:1.6; }
+      .steps { margin:16px 0;padding-left:18px; }
+      .cta { display:inline-block;background:#1C6EA4;color:#ffffff !important;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:bold; }
+      .cta:hover { background:#175e8d; }
+      .footer { padding:16px 24px;text-align:center;background:#f8fafc;color:#6b7280;font-size:12px; }
+      .spacer { height:12px; }
+    </style>
+  </head>
+  <body style="margin:0;background:#f1f5f9;">
+    <div class="container">
+      <div class="header">
+        <div class="brand">KARE Hall Booking</div>
+      </div>
+      <div class="content">
+        <h1 class="h1">Welcome to KARE Hall Booking</h1>
+        <p class="muted">Hi {{name}}, we're excited to have you on board. Booking halls is now simple and fast.</p>
+        <div class="spacer"></div>
+        <ol class="steps">
+          <li>Create a booking with your event details.</li>
+          <li>Track the status from your dashboard.</li>
+          <li>Conduct your event with confidence.</li>
+        </ol>
+        <div class="spacer"></div>
+        <a class="cta" href="{{PUBLIC_SITE_URL}}/book" target="_blank" rel="noopener">Book a Hall</a>
+      </div>
+      <div class="footer">
+        Questions? Contact us at {{ADMIN_EMAIL}} · © KARE Hall Booking
+      </div>
+    </div>
+  </body>
+  </html>
+
+
