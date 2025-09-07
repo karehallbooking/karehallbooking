@@ -10,42 +10,42 @@ const sampleHalls = [
     name: 'K. S. Krishnan Auditorium',
     capacity: 500,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Stage', 'Microphones'],
-    image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=300&fit=crop',
+    image: 'https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg',
     available: true
   },
   {
     name: 'Dr. V. Vasudevan Seminar Hall',
     capacity: 200,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Whiteboard'],
-    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=500&h=300&fit=crop',
+    image: 'https://th-i.thgim.com/public/incoming/8jwn1a/article68094565.ece/alternates/FREE_1200/23April_Campus_Kalasa.jpg',
     available: true
   },
   {
     name: 'Admin Block Seminar Hall',
     capacity: 80,
     facilities: ['Projector', 'Air Conditioning', 'Whiteboard', 'Microphones'],
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&h=300&fit=crop',
+    image: 'https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg',
     available: true
   },
   {
     name: 'Srinivasa Ramanujam Block Seminar Hall',
     capacity: 120,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Whiteboard', 'Microphones'],
-    image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=500&h=300&fit=crop',
+    image: 'https://app.afternoonnews.in/storage/images/5/1Ff6G694j4thp0GWuXwp6i58oob3fpPIdVlJd3OF.jpg',
     available: true
   },
   {
     name: 'Dr. A. P. J. Abdul Kalam Block Seminar Hall',
     capacity: 150,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Stage', 'Whiteboard', 'Microphones'],
-    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500&h=300&fit=crop',
+    image: 'https://i.ytimg.com/vi/mp9FMt4WnqI/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHUBoAC4AOKAgwIABABGFMgQyh_MA8=&rs=AOn4CLCTbpdeDXSQi7jV0KFO1U2MF2SNNw',
     available: true
   },
   {
     name: 'Dr. S. Radha Krishnan Senate Hall',
     capacity: 200,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Stage', 'Microphones', 'Conference Table'],
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop',
+    image: 'https://thenews21.com/wp-content/uploads/2023/02/WhatsApp-Image-2023-02-26-at-8.23.14-PM-1-1024x682.jpeg',
     available: true
   }
 ];

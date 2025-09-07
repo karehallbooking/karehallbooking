@@ -60,7 +60,7 @@ export function HallManagement() {
         name: formData.name.trim(),
         capacity: parseInt(formData.capacity),
         facilities,
-        image: formData.image.trim() || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop',
+        image: formData.image.trim() || 'https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg',
         available: formData.available
       };
 

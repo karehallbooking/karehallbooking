@@ -36,7 +36,7 @@ export function AppNavbar({ showLoginButton = false, showUserMenu = false, isAdm
           {/* Full Banner Image (always visible) */}
           <div className="absolute left-1/2 transform -translate-x-1/2 z-10 pointer-events-none">
             <img
-              src="/src/assets/owner.png"
+              src="/owner.png"
               alt="KALASALINGAM ACADEMY OF RESEARCH AND EDUCATION Banner"
               className="h-22 w-auto object-contain pointer-events-none"
               onError={(e) => {

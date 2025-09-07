@@ -66,7 +66,7 @@ export function Home() {
       id: 1,
       name: "K. S. Krishnan Auditorium",
       capacity: 500,
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop",
+      image: "https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg",
       facilities: ["AC", "Stage", "Audio", "Projector", "Microphones"],
       popular: true
     },
@@ -74,7 +74,7 @@ export function Home() {
       id: 2,
       name: "Dr. S. Radha Krishnan Senate Hall",
       capacity: 200,
-      image: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=500&h=300&fit=crop",
+      image: "https://thenews21.com/wp-content/uploads/2023/02/WhatsApp-Image-2023-02-26-at-8.23.14-PM-1-1024x682.jpeg",
       facilities: ["AC", "Stage", "Audio", "Conference Table"],
       popular: false
     },
@@ -82,7 +82,7 @@ export function Home() {
       id: 3,
       name: "Dr. A. P. J. Abdul Kalam Block Seminar Hall",
       capacity: 150,
-      image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&h=300&fit=crop",
+      image: "https://i.ytimg.com/vi/mp9FMt4WnqI/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHUBoAC4AOKAgwIABABGFMgQyh_MA8=&rs=AOn4CLCTbpdeDXSQi7jV0KFO1U2MF2SNNw",
       facilities: ["AC", "Stage", "Audio", "Whiteboard"],
       popular: true
     },
@@ -90,7 +90,7 @@ export function Home() {
       id: 4,
       name: "Admin Block Seminar Hall",
       capacity: 80,
-      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500&h=300&fit=crop",
+      image: "https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg",
       facilities: ["AC", "Projector", "Whiteboard"],
       popular: false
     },
@@ -98,7 +98,7 @@ export function Home() {
       id: 5,
       name: "Srinivasa Ramanujam Block Seminar Hall",
       capacity: 120,
-      image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=500&h=300&fit=crop",
+      image: "https://app.afternoonnews.in/storage/images/5/1Ff6G694j4thp0GWuXwp6i58oob3fpPIdVlJd3OF.jpg",
       facilities: ["AC", "Audio", "Projector", "Whiteboard", "Microphones"],
       popular: true
     },
@@ -106,7 +106,7 @@ export function Home() {
       id: 6,
       name: "Dr. V. Vasudevan Seminar Hall",
       capacity: 200,
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&h=300&fit=crop",
+      image: "https://th-i.thgim.com/public/incoming/8jwn1a/article68094565.ece/alternates/FREE_1200/23April_Campus_Kalasa.jpg",
       facilities: ["AC", "Projector", "Whiteboard", "Audio"],
       popular: false
     }
@@ -142,7 +142,7 @@ export function Home() {
 
   // Stats data
   const stats = [
-    { label: "Halls Available Today", value: 15, icon: School },
+    { label: "Halls Available Today", value: halls.length, icon: School },
     { label: "Bookings Approved This Month", value: 27, icon: CheckCircle },
     { label: "Students Served", value: 1200, icon: Users }
   ];
@@ -454,99 +454,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* User Testimonials Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              What Our Users Say
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Real feedback from our satisfied users
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6 italic">"{testimonial.review}"</p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-white font-bold text-lg">
-                      {testimonial.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-gray-600 text-sm">{testimonial.role}</p>
-                    <p className="text-blue-600 text-sm font-medium">{testimonial.event}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Attractive Features Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Why Choose Us
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover the features that make us the best choice
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={scaleIn}
-                className="group bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+      
 
       {/* Call-to-Action Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-700">
