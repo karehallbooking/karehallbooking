@@ -150,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: firebaseUser.displayName || 'User',
           email: firebaseUser.email || '',
           mobile: '',
+          designation: 'Faculty',
           department: '',
           role: isAdmin ? 'admin' : 'user'
         };
@@ -159,6 +160,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           createdAt: new Date(),
           lastLogin: new Date()
         });
+
+        // Call backend API to trigger welcome email for new Google users
+        try {
+          const token = await firebaseUser.getIdToken();
+          const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              uid: firebaseUser.uid,
+              name: firebaseUser.displayName || 'User',
+              mobile: '',
+              email: firebaseUser.email || '',
+              designation: 'Faculty',
+              department: ''
+            })
+          });
+
+          if (!response.ok) {
+            console.warn('Backend registration failed for Google user, but Firebase registration succeeded:', response.statusText);
+          } else {
+            console.log('✅ Backend registration successful for Google user, welcome email sent');
+          }
+        } catch (backendError) {
+          console.warn('Backend registration failed for Google user, but Firebase registration succeeded:', backendError);
+          // Don't fail the registration if backend call fails
+        }
         
         return newUser;
       }
@@ -189,6 +219,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date(),
         lastLogin: new Date()
       });
+
+      // Call backend API to trigger welcome email
+      try {
+        const token = await firebaseUser.getIdToken();
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            uid: firebaseUser.uid,
+            name: userData.name,
+            mobile: userData.mobile,
+            email: userData.email,
+            designation: 'Faculty', // Default designation
+            department: userData.department
+          })
+        });
+
+        if (!response.ok) {
+          console.warn('Backend registration failed, but Firebase registration succeeded:', response.statusText);
+        } else {
+          console.log('✅ Backend registration successful, welcome email sent');
+        }
+      } catch (backendError) {
+        console.warn('Backend registration failed, but Firebase registration succeeded:', backendError);
+        // Don't fail the registration if backend call fails
+      }
       
       return newUser;
     } catch (error: any) {
