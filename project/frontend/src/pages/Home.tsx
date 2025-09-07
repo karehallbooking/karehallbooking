@@ -66,7 +66,7 @@ export function Home() {
       id: 1,
       name: "K. S. Krishnan Auditorium",
       capacity: 500,
-      image: "https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg",
+      image: "https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg",
       facilities: ["AC", "Stage", "Audio", "Projector", "Microphones"],
       popular: true
     },
@@ -90,7 +90,7 @@ export function Home() {
       id: 4,
       name: "Admin Block Seminar Hall",
       capacity: 80,
-      image: "https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg",
+      image: "https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg",
       facilities: ["AC", "Projector", "Whiteboard"],
       popular: false
     },

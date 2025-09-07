@@ -10,7 +10,7 @@ const sampleHalls = [
     name: 'K. S. Krishnan Auditorium',
     capacity: 500,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Stage', 'Microphones'],
-    image: 'https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg',
+    image: 'https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg',
     available: true
   },
   {
@@ -24,7 +24,7 @@ const sampleHalls = [
     name: 'Admin Block Seminar Hall',
     capacity: 80,
     facilities: ['Projector', 'Air Conditioning', 'Whiteboard', 'Microphones'],
-    image: 'https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg',
+    image: 'https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg',
     available: true
   },
   {
