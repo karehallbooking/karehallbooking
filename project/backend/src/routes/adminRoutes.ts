@@ -4,6 +4,8 @@ import { BookingService } from '../services/bookingService';
 import { UserService } from '../services/userService';
 import { db, collections } from '../config/firebase';
 import { ApiResponse, Booking, Hall } from '../types';
+import { sendMail } from '../utils/mailer';
+import { bookingApproved, bookingRejected } from '../utils/emailTemplates';
 
 const router = Router();
 
@@ -259,6 +261,32 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
       adminComments
     );
 
+    // Email user about approval
+    try {
+      const hallName = updatedBooking.hallName || (updatedBooking as any).hall || 'Hall';
+      const emailData = {
+        bookingId,
+        hallName,
+        dates: updatedBooking.dates || [],
+        timeFrom: updatedBooking.timeFrom,
+        timeTo: updatedBooking.timeTo,
+        purpose: updatedBooking.purpose,
+        peopleCount: updatedBooking.seatingCapacity,
+        bookedBy: updatedBooking.userName,
+        contact: updatedBooking.userMobile
+      };
+      if (updatedBooking.userEmail) {
+        await sendMail({
+          to: updatedBooking.userEmail,
+          subject: `Your booking is approved ✅ — ${hallName}`,
+          html: bookingApproved(emailData),
+          text: `Your booking is approved. View: ${(process.env.PUBLIC_SITE_URL || '')}/my-bookings/${bookingId}`
+        });
+      }
+    } catch (e: any) {
+      console.error('❌ Booking approval mail failed:', e?.message || e);
+    }
+
     res.json({
       success: true,
       message: 'Booking approved successfully',
@@ -319,6 +347,30 @@ router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Pr
       req.user.uid,
       adminComments
     );
+
+    // Email user about rejection
+    try {
+      const hallName = updatedBooking.hallName || (updatedBooking as any).hall || 'Hall';
+      const emailData = {
+        bookingId,
+        hallName,
+        dates: updatedBooking.dates || [],
+        timeFrom: updatedBooking.timeFrom,
+        timeTo: updatedBooking.timeTo,
+        purpose: updatedBooking.purpose,
+        rejectionReason: adminComments
+      };
+      if (updatedBooking.userEmail) {
+        await sendMail({
+          to: updatedBooking.userEmail,
+          subject: `Update on your booking request — ${hallName}`,
+          html: bookingRejected(emailData),
+          text: `Your booking was not approved.${adminComments ? ' Reason: ' + adminComments : ''} Try again: ${(process.env.PUBLIC_SITE_URL || '')}/book`
+        });
+      }
+    } catch (e: any) {
+      console.error('❌ Booking rejection mail failed:', e?.message || e);
+    }
 
     res.json({
       success: true,

@@ -2,6 +2,8 @@ import { Router, Response, Request } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/authMiddleware';
 import { BookingService } from '../services/bookingService';
 import { ApiResponse, Booking } from '../types';
+import { sendMail } from '../utils/mailer';
+import { bookingReceivedUser, bookingReceivedAdmin } from '../utils/emailTemplates';
 import { db, collections } from '../config/firebase';
 
 const router = Router();
@@ -153,6 +155,54 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response): Pro
     };
 
     const newBooking = await BookingService.createBooking(bookingData);
+
+    // Logging + transactional emails (user + admin)
+    try {
+      console.log('📌 Booking request received');
+      console.log(`✅ Booking saved with ID: ${newBooking.bookingId}`);
+
+      const hallNameDisplay = newBooking.hallName || (newBooking as any).hall || 'Hall';
+      const emailData = {
+        bookingId: newBooking.bookingId as string,
+        hallName: hallNameDisplay,
+        dates: newBooking.dates || [],
+        timeFrom: newBooking.timeFrom,
+        timeTo: newBooking.timeTo,
+        purpose: newBooking.purpose,
+        peopleCount: newBooking.seatingCapacity,
+        bookedBy: newBooking.userName,
+        contact: newBooking.userMobile,
+        userEmail: newBooking.userEmail
+      };
+
+      if (newBooking.userEmail) {
+        try {
+          await sendMail({
+            to: newBooking.userEmail,
+            subject: `We received your booking request — ${hallNameDisplay}`,
+            html: bookingReceivedUser(emailData),
+            text: `We received your booking request for ${hallNameDisplay}. View: ${(process.env.PUBLIC_SITE_URL || '')}/my-bookings/${newBooking.bookingId}`
+          });
+        } catch (e: any) {
+          console.error('❌ User booking mail failed:', e?.message || e);
+        }
+      }
+
+      if (process.env.ADMIN_EMAIL) {
+        try {
+          await sendMail({
+            to: process.env.ADMIN_EMAIL!,
+            subject: `New booking request — ${hallNameDisplay}`,
+            html: bookingReceivedAdmin(emailData),
+            text: `New booking ID: ${newBooking.bookingId}`
+          });
+        } catch (e: any) {
+          console.error('❌ Admin booking mail failed:', e?.message || e);
+        }
+      }
+    } catch (logErr) {
+      console.error('❌ Post-create mail/log error:', (logErr as any)?.message || logErr);
+    }
 
     res.status(201).json({
       success: true,

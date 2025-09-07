@@ -1,9 +1,13 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
+import { verifySmtp } from './utils/mailer';
+import { startBookingWatcher } from './workers/bookingWatcher';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -12,9 +16,16 @@ import adminRoutes from './routes/adminRoutes';
 
 // Import Firebase config to initialize
 import './config/firebase';
-
-// Load environment variables
-dotenv.config();
+(() => {
+  const required = ['SMTP_HOST','SMTP_PORT','SMTP_USER','SMTP_PASS','ADMIN_EMAIL','PUBLIC_SITE_URL'];
+  const missing = required.filter((k) => !process.env[k]);
+  if (missing.length) {
+    console.warn(`⚠️  Missing environment variables: ${missing.join(', ')}`);
+  } else {
+    console.log('✅ server env loaded');
+  }
+  console.log(`🔧 SMTP target: ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}`);
+})();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -158,6 +169,10 @@ app.listen(PORT, () => {
 🔗 Health Check: http://localhost:${PORT}/health
 📚 API Base URL: http://localhost:${PORT}/api
   `);
+  // Warm checks
+  verifySmtp().catch(() => {});
+  // Start Firestore watcher so backend reacts to frontend-created docs
+  startBookingWatcher();
 });
 
 // Graceful shutdown
