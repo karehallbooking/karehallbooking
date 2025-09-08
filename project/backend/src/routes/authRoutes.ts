@@ -49,6 +49,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     // Send welcome email
     try {
+      console.log(`📧 Sending welcome email to: ${email}`);
       await sendMail({
         to: email,
         subject: 'Welcome to KARE Hall Booking — Let\'s get started',

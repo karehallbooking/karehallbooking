@@ -96,11 +96,22 @@ export function startBookingWatcher(): void {
           // Handle status changes
           const prev = lastStatus.get(bookingId);
           const current = getString(b.status);
+          console.log(`🔄 Booking ${bookingId} status changed: ${prev} → ${current}`);
           lastStatus.set(bookingId, current);
-          if (prev === current) return;
-          if (current !== 'approved' && current !== 'rejected') return;
+          if (prev === current) {
+            console.log(`⏭️  Skipping ${bookingId} - status unchanged`);
+            return;
+          }
+          if (current !== 'approved' && current !== 'rejected') {
+            console.log(`⏭️  Skipping ${bookingId} - status is ${current}, not approved/rejected`);
+            return;
+          }
           const userEmail = getString(b.userEmail) || getString(b.email);
-          if (!userEmail) return;
+          if (!userEmail) {
+            console.log(`❌ No user email found for booking ${bookingId}`);
+            return;
+          }
+          console.log(`📧 Processing ${current} email for booking ${bookingId} to ${userEmail}`);
           
           // Also ensure the update happened after server start (avoid replay on initial snapshot)
           const updatedAtMs = toMs((b as any).updatedAt) || toMs((b as any).createdAt);

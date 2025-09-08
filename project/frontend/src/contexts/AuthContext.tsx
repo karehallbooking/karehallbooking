@@ -164,6 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Call backend API to trigger welcome email for new Google users
         try {
           const token = await firebaseUser.getIdToken();
+          console.log('🔄 Calling backend API for Google user welcome email...');
           const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {
@@ -180,8 +181,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             })
           });
 
+          console.log('📡 Backend response status for Google user:', response.status);
           if (!response.ok) {
-            console.warn('Backend registration failed for Google user, but Firebase registration succeeded:', response.statusText);
+            const errorText = await response.text();
+            console.warn('Backend registration failed for Google user, but Firebase registration succeeded:', response.status, errorText);
           } else {
             console.log('✅ Backend registration successful for Google user, welcome email sent');
           }
@@ -223,6 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Call backend API to trigger welcome email
       try {
         const token = await firebaseUser.getIdToken();
+        console.log('🔄 Calling backend API for welcome email...');
         const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
@@ -239,8 +243,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           })
         });
 
+        console.log('📡 Backend response status:', response.status);
         if (!response.ok) {
-          console.warn('Backend registration failed, but Firebase registration succeeded:', response.statusText);
+          const errorText = await response.text();
+          console.warn('Backend registration failed, but Firebase registration succeeded:', response.status, errorText);
         } else {
           console.log('✅ Backend registration successful, welcome email sent');
         }
