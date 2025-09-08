@@ -276,12 +276,16 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
         contact: updatedBooking.userMobile
       };
       if (updatedBooking.userEmail) {
+        console.log(`📧 Sending approval email to: ${updatedBooking.userEmail}`);
         await sendMail({
           to: updatedBooking.userEmail,
           subject: `Your booking is approved ✅ — ${hallName}`,
           html: bookingApproved(emailData),
-          text: `Your booking is approved. View: ${(process.env.PUBLIC_SITE_URL || '')}/my-bookings/${bookingId}`
+          text: `Your booking is approved. View: https://karehallbooking.netlify.app/my-bookings/${bookingId}`
         });
+        console.log(`✅ Approval email sent successfully to: ${updatedBooking.userEmail}`);
+      } else {
+        console.log(`❌ No user email found for booking ${bookingId}`);
       }
     } catch (e: any) {
       console.error('❌ Booking approval mail failed:', e?.message || e);
@@ -361,12 +365,16 @@ router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Pr
         rejectionReason: adminComments
       };
       if (updatedBooking.userEmail) {
+        console.log(`📧 Sending rejection email to: ${updatedBooking.userEmail}`);
         await sendMail({
           to: updatedBooking.userEmail,
           subject: `Update on your booking request — ${hallName}`,
           html: bookingRejected(emailData),
-          text: `Your booking was not approved.${adminComments ? ' Reason: ' + adminComments : ''} Try again: ${(process.env.PUBLIC_SITE_URL || '')}/book`
+          text: `Your booking was not approved.${adminComments ? ' Reason: ' + adminComments : ''} Try again: https://karehallbooking.netlify.app/book`
         });
+        console.log(`✅ Rejection email sent successfully to: ${updatedBooking.userEmail}`);
+      } else {
+        console.log(`❌ No user email found for booking ${bookingId}`);
       }
     } catch (e: any) {
       console.error('❌ Booking rejection mail failed:', e?.message || e);

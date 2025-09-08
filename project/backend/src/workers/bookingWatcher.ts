@@ -1,7 +1,7 @@
 import { db, collections } from '../config/firebase';
 import admin from 'firebase-admin';
 import { sendMail } from '../utils/mailer';
-import { bookingReceivedUser, bookingReceivedAdmin, bookingApproved, bookingRejected } from '../utils/emailTemplates';
+import { bookingReceivedUser, bookingReceivedAdmin } from '../utils/emailTemplates';
 
 function getString(field: any): string | undefined {
   if (field === undefined || field === null) return undefined;
@@ -93,66 +93,16 @@ export function startBookingWatcher(): void {
             console.error('❌ Booking watcher create error:', err?.message || err);
           }
         } else if (change.type === 'modified') {
-          // Handle status changes
+          // Handle status changes - just log for monitoring, emails are sent directly by admin routes
           const prev = lastStatus.get(bookingId);
           const current = getString(b.status);
           console.log(`🔄 Booking ${bookingId} status changed: ${prev} → ${current}`);
           lastStatus.set(bookingId, current);
-          if (prev === current) {
-            console.log(`⏭️  Skipping ${bookingId} - status unchanged`);
-            return;
-          }
-          if (current !== 'approved' && current !== 'rejected') {
-            console.log(`⏭️  Skipping ${bookingId} - status is ${current}, not approved/rejected`);
-            return;
-          }
-          const userEmail = getString(b.userEmail) || getString(b.email);
-          if (!userEmail) {
-            console.log(`❌ No user email found for booking ${bookingId}`);
-            return;
-          }
-          console.log(`📧 Processing ${current} email for booking ${bookingId} to ${userEmail}`);
           
-          // Also ensure the update happened after server start (avoid replay on initial snapshot)
-          const updatedAtMs = toMs((b as any).updatedAt) || toMs((b as any).createdAt);
-          if (updatedAtMs !== null) {
-            const thresholdMs = serverStartedAtMs - 2000;
-            if (updatedAtMs < thresholdMs) {
-              return;
-            }
-          }
-          try {
-            const hallName = getString(b.hallName) || getString(b.hall) || 'Hall';
-            const emailData = {
-              bookingId,
-              hallName,
-              dates: (b.dates || []) as string[],
-              timeFrom: getString(b.timeFrom) || '',
-              timeTo: getString(b.timeTo) || '',
-              purpose: getString(b.purpose) || '',
-              peopleCount: b.seatingCapacity as number | undefined,
-              bookedBy: getString(b.userName),
-              contact: getString(b.userMobile),
-              rejectionReason: getString(b.adminComments)
-            } as any;
-            if (current === 'approved') {
-              await sendMail({
-                to: userEmail,
-                subject: `Your booking is approved ✅ — ${hallName}`,
-                html: bookingApproved(emailData),
-                text: `Your booking is approved. View: https://karehallbooking.netlify.app/my-bookings/${bookingId}`
-              });
-            } else {
-              await sendMail({
-                to: userEmail,
-                subject: `Update on your booking request — ${hallName}`,
-                html: bookingRejected(emailData),
-                text: `Your booking was not approved.${emailData.rejectionReason ? ' Reason: ' + emailData.rejectionReason : ''} Try again: https://karehallbooking.netlify.app/book`
-              });
-            }
-            console.log(`✅ Booking ${bookingId} status email sent (${current})`);
-          } catch (err: any) {
-            console.error('❌ Booking watcher status error:', err?.message || err);
+          // Note: Status change emails are now handled directly in admin routes
+          // to avoid duplicate emails and Firestore listener reliability issues on Render
+          if (current === 'approved' || current === 'rejected') {
+            console.log(`📧 Status change email should be sent by admin route for booking ${bookingId}`);
           }
         }
       });
