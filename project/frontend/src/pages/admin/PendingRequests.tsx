@@ -30,13 +30,36 @@ export function PendingRequests() {
   const handleApprove = async (bookingId: string) => {
     try {
       setProcessing(bookingId);
-      await FirestoreService.updateBooking(bookingId, { 
-        status: 'approved',
-        updatedAt: new Date().toISOString()
+      console.log(`🔄 Calling backend API to approve booking: ${bookingId}`);
+      
+      // Get Firebase token for authentication
+      const { auth } = await import('../../config/firebase');
+      const { getAuth } = await import('firebase/auth');
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+      
+      const token = await user.getIdToken();
+      
+      // Call backend API for approval
+      const response = await fetch(`/api/admin/bookings/${bookingId}/approve`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({})
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Backend approval failed: ${response.status} ${errorText}`);
+      }
+      
+      console.log(`✅ Backend approval successful for booking: ${bookingId}`);
       await loadPendingBookings(); // Reload data
     } catch (error) {
       console.error('Error approving booking:', error);
+      alert(`Failed to approve booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setProcessing(null);
     }
@@ -45,13 +68,36 @@ export function PendingRequests() {
   const handleReject = async (bookingId: string) => {
     try {
       setProcessing(bookingId);
-      await FirestoreService.updateBooking(bookingId, { 
-        status: 'rejected',
-        updatedAt: new Date().toISOString()
+      console.log(`🔄 Calling backend API to reject booking: ${bookingId}`);
+      
+      // Get Firebase token for authentication
+      const { auth } = await import('../../config/firebase');
+      const { getAuth } = await import('firebase/auth');
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+      
+      const token = await user.getIdToken();
+      
+      // Call backend API for rejection
+      const response = await fetch(`/api/admin/bookings/${bookingId}/reject`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({})
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Backend rejection failed: ${response.status} ${errorText}`);
+      }
+      
+      console.log(`✅ Backend rejection successful for booking: ${bookingId}`);
       await loadPendingBookings(); // Reload data
     } catch (error) {
       console.error('Error rejecting booking:', error);
+      alert(`Failed to reject booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setProcessing(null);
     }
