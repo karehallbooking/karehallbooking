@@ -93,7 +93,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed top-20 bottom-0 left-0 flex w-80 flex-col bg-white">
+        <div className="fixed top-24 bottom-0 left-0 flex w-80 flex-col bg-white">
           <div className="flex h-20 items-center justify-between px-6">
             <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
             <button
@@ -145,7 +145,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:top-20 lg:bottom-0 lg:flex lg:w-80 lg:flex-col">
+      <div className="hidden lg:fixed lg:top-24 lg:bottom-0 lg:flex lg:w-80 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 overflow-y-auto">
           <div className="flex h-20 items-center justify-between px-6">
             <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
