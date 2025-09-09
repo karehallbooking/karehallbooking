@@ -3,6 +3,8 @@ const colors = {
   mid: '#1C6EA4',
   accent: '#33A1E0'
 };
+// Frontend base URL used in all email links
+const siteBase = process.env.FRONTEND_URL || 'https://karehallbooking.vercel.app';
 
 function layout(title: string, body: string): string {
   return `
@@ -35,7 +37,7 @@ function layout(title: string, body: string): string {
 export function bookingReceivedUser(data: {
   bookingId: string; hallName: string; dates: string[]; timeFrom: string; timeTo: string; purpose: string; peopleCount?: number; bookedBy?: string; contact?: string;
 }): string {
-  const site = 'https://karehallbooking.netlify.app';
+  const site = siteBase;
   const rows = `
 <tr><th>Hall</th><td>${data.hallName}</td></tr>
 <tr><th>Dates</th><td>${(data.dates || []).join(', ')}</td></tr>
@@ -55,7 +57,7 @@ ${data.contact ? `<tr><th>Contact</th><td>${data.contact}</td></tr>` : ''}
 export function bookingReceivedAdmin(data: {
   bookingId: string; hallName: string; dates: string[]; timeFrom: string; timeTo: string; purpose: string; userEmail: string; peopleCount?: number; bookedBy?: string; contact?: string;
 }): string {
-  const site = 'https://karehallbooking.netlify.app';
+  const site = siteBase;
   const rows = `
 <tr><th>Hall</th><td>${data.hallName}</td></tr>
 <tr><th>Dates</th><td>${(data.dates || []).join(', ')}</td></tr>
@@ -74,7 +76,7 @@ ${data.contact ? `<tr><th>Contact</th><td>${data.contact}</td></tr>` : ''}
 export function bookingApproved(data: {
   bookingId: string; hallName: string; dates: string[]; timeFrom: string; timeTo: string; purpose: string; peopleCount?: number; bookedBy?: string; contact?: string;
 }): string {
-  const site = 'https://karehallbooking.netlify.app';
+  const site = siteBase;
   const rows = `
 <tr><th>Hall</th><td>${data.hallName}</td></tr>
 <tr><th>Dates</th><td>${(data.dates || []).join(', ')}</td></tr>
@@ -94,7 +96,7 @@ ${data.contact ? `<tr><th>Contact</th><td>${data.contact}</td></tr>` : ''}
 export function bookingRejected(data: {
   bookingId: string; hallName: string; dates: string[]; timeFrom: string; timeTo: string; purpose: string; rejectionReason?: string;
 }): string {
-  const site = 'https://karehallbooking.netlify.app';
+  const site = siteBase;
   const rows = `
 <tr><th>Hall</th><td>${data.hallName}</td></tr>
 <tr><th>Dates</th><td>${(data.dates || []).join(', ')}</td></tr>
@@ -109,7 +111,7 @@ ${data.rejectionReason ? `<p><strong>Reason:</strong> ${data.rejectionReason}</p
 }
 
 export function welcomeEmail(data: { name: string }): string {
-  const site = 'https://karehallbooking.netlify.app';
+  const site = siteBase;
   const body = `
 <p>Hi ${data.name}, we're excited to have you on board. Booking halls is now simple and fast.</p>
 <div class="spacer"></div>
