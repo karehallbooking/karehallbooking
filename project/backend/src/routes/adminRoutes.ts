@@ -304,7 +304,7 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
     res.json({
       success: true,
       message: 'Booking approved successfully',
-      data: { booking: { ...booking, status: 'approved', updatedAt: new Date() } }
+      data: { booking: { ...booking, status: 'approved' } }
     } as ApiResponse<{ booking: Booking }>);
 
   } catch (error) {
@@ -403,7 +403,7 @@ router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Pr
     res.json({
       success: true,
       message: 'Booking rejected successfully',
-      data: { booking: { ...booking, status: 'rejected', updatedAt: new Date() } }
+      data: { booking: { ...booking, status: 'rejected' } }
     } as ApiResponse<{ booking: Booking }>);
 
   } catch (error) {
