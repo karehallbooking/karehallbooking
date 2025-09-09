@@ -203,6 +203,8 @@ router.get('/bookings/history', async (req: AuthRequest, res: Response): Promise
  */
 router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    console.log(`🔄 Admin approval request for booking: ${req.params.id}`);
+    
     if (!req.user) {
       res.status(401).json({
         success: false,
@@ -214,6 +216,7 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
 
     const bookingId = req.params.id;
     const { adminComments } = req.body;
+    console.log(`📝 Admin comments: ${adminComments || 'None'}`);
 
     const booking = await BookingService.getBookingById(bookingId);
 
@@ -254,36 +257,43 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
       return;
     }
 
-    const updatedBooking = await BookingService.updateBookingStatus(
-      bookingId,
-      'approved',
-      req.user.uid,
-      adminComments
-    );
+    // Update booking status directly (same approach as booking creation)
+    const bookingRef = db.collection(collections.bookings).doc(bookingId);
+    const updateData: any = {
+      status: 'approved',
+      updatedAt: new Date(),
+      approvedBy: req.user.uid,
+    };
+    if (adminComments) {
+      updateData.adminComments = adminComments;
+    }
+    await bookingRef.update(updateData);
+    console.log(`✅ Booking status updated to approved`);
 
-    // Email user about approval
+    // Send approval email immediately (same approach as booking creation emails)
     try {
-      const hallName = updatedBooking.hallName || (updatedBooking as any).hall || 'Hall';
+      const hallName = booking.hallName || (booking as any).hall || 'Hall';
       const emailData = {
         bookingId,
         hallName,
-        dates: updatedBooking.dates || [],
-        timeFrom: updatedBooking.timeFrom,
-        timeTo: updatedBooking.timeTo,
-        purpose: updatedBooking.purpose,
-        peopleCount: updatedBooking.seatingCapacity,
-        bookedBy: updatedBooking.userName,
-        contact: updatedBooking.userMobile
+        dates: booking.dates || [],
+        timeFrom: booking.timeFrom,
+        timeTo: booking.timeTo,
+        purpose: booking.purpose,
+        peopleCount: booking.seatingCapacity,
+        bookedBy: booking.userName,
+        contact: booking.userMobile
       };
-      if (updatedBooking.userEmail) {
-        console.log(`📧 Sending approval email to: ${updatedBooking.userEmail}`);
+      
+      if (booking.userEmail) {
+        console.log(`📧 Sending approval email to: ${booking.userEmail}`);
         await sendMail({
-          to: updatedBooking.userEmail,
+          to: booking.userEmail,
           subject: `Your booking is approved ✅ — ${hallName}`,
           html: bookingApproved(emailData),
           text: `Your booking is approved. View: https://karehallbooking.netlify.app/my-bookings/${bookingId}`
         });
-        console.log(`✅ Approval email sent successfully to: ${updatedBooking.userEmail}`);
+        console.log(`✅ Approval email sent successfully to: ${booking.userEmail}`);
       } else {
         console.log(`❌ No user email found for booking ${bookingId}`);
       }
@@ -294,7 +304,7 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
     res.json({
       success: true,
       message: 'Booking approved successfully',
-      data: { booking: updatedBooking }
+      data: { booking: { ...booking, status: 'approved', updatedAt: new Date() } }
     } as ApiResponse<{ booking: Booking }>);
 
   } catch (error) {
@@ -313,6 +323,8 @@ router.patch('/bookings/:id/approve', async (req: AuthRequest, res: Response): P
  */
 router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    console.log(`🔄 Admin rejection request for booking: ${req.params.id}`);
+    
     if (!req.user) {
       res.status(401).json({
         success: false,
@@ -324,6 +336,7 @@ router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Pr
 
     const bookingId = req.params.id;
     const { adminComments } = req.body;
+    console.log(`📝 Admin comments: ${adminComments || 'None'}`);
 
     const booking = await BookingService.getBookingById(bookingId);
 
@@ -345,34 +358,41 @@ router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Pr
       return;
     }
 
-    const updatedBooking = await BookingService.updateBookingStatus(
-      bookingId,
-      'rejected',
-      req.user.uid,
-      adminComments
-    );
+    // Update booking status directly (same approach as booking creation)
+    const bookingRef = db.collection(collections.bookings).doc(bookingId);
+    const updateData: any = {
+      status: 'rejected',
+      updatedAt: new Date(),
+      rejectedBy: req.user.uid,
+    };
+    if (adminComments) {
+      updateData.adminComments = adminComments;
+    }
+    await bookingRef.update(updateData);
+    console.log(`✅ Booking status updated to rejected`);
 
-    // Email user about rejection
+    // Send rejection email immediately (same approach as booking creation emails)
     try {
-      const hallName = updatedBooking.hallName || (updatedBooking as any).hall || 'Hall';
+      const hallName = booking.hallName || (booking as any).hall || 'Hall';
       const emailData = {
         bookingId,
         hallName,
-        dates: updatedBooking.dates || [],
-        timeFrom: updatedBooking.timeFrom,
-        timeTo: updatedBooking.timeTo,
-        purpose: updatedBooking.purpose,
+        dates: booking.dates || [],
+        timeFrom: booking.timeFrom,
+        timeTo: booking.timeTo,
+        purpose: booking.purpose,
         rejectionReason: adminComments
       };
-      if (updatedBooking.userEmail) {
-        console.log(`📧 Sending rejection email to: ${updatedBooking.userEmail}`);
+      
+      if (booking.userEmail) {
+        console.log(`📧 Sending rejection email to: ${booking.userEmail}`);
         await sendMail({
-          to: updatedBooking.userEmail,
+          to: booking.userEmail,
           subject: `Update on your booking request — ${hallName}`,
           html: bookingRejected(emailData),
           text: `Your booking was not approved.${adminComments ? ' Reason: ' + adminComments : ''} Try again: https://karehallbooking.netlify.app/book`
         });
-        console.log(`✅ Rejection email sent successfully to: ${updatedBooking.userEmail}`);
+        console.log(`✅ Rejection email sent successfully to: ${booking.userEmail}`);
       } else {
         console.log(`❌ No user email found for booking ${bookingId}`);
       }
@@ -383,7 +403,7 @@ router.patch('/bookings/:id/reject', async (req: AuthRequest, res: Response): Pr
     res.json({
       success: true,
       message: 'Booking rejected successfully',
-      data: { booking: updatedBooking }
+      data: { booking: { ...booking, status: 'rejected', updatedAt: new Date() } }
     } as ApiResponse<{ booking: Booking }>);
 
   } catch (error) {
