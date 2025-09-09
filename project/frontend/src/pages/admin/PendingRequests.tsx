@@ -41,7 +41,7 @@ export function PendingRequests() {
       const token = await user.getIdToken();
       
       // Call backend API for approval
-      const response = await fetch(`/api/admin/bookings/${bookingId}/approve`, {
+      const response = await fetch(`https://karehallbooking-g695.onrender.com/api/admin/bookings/${bookingId}/approve`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ export function PendingRequests() {
       const token = await user.getIdToken();
       
       // Call backend API for rejection
-      const response = await fetch(`/api/admin/bookings/${bookingId}/reject`, {
+      const response = await fetch(`https://karehallbooking-g695.onrender.com/api/admin/bookings/${bookingId}/reject`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

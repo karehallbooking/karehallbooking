@@ -61,7 +61,8 @@ const corsOptions = {
       'http://localhost:3000',
       'http://localhost:5000',
       'https://kare-hall-booking.web.app',
-      'https://kare-hall-booking.firebaseapp.com'
+      'https://kare-hall-booking.firebaseapp.com',
+      'https://karehallbooking.netlify.app'
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1) {

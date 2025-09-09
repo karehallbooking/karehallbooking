@@ -165,7 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const token = await firebaseUser.getIdToken();
           console.log('🔄 Calling backend API for Google user welcome email...');
-          const response = await fetch('/api/auth/register', {
+          const response = await fetch('https://karehallbooking-g695.onrender.com/api/auth/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const token = await firebaseUser.getIdToken();
         console.log('🔄 Calling backend API for welcome email...');
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('https://karehallbooking-g695.onrender.com/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
