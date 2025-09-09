@@ -13,8 +13,7 @@ import {
   BarChart3,
   LogOut,
   Menu,
-  X,
-  RefreshCw
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { AppNavbar } from './AppNavbar';
@@ -94,7 +93,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-80 flex-col bg-white">
+        <div className="fixed top-20 bottom-0 left-0 flex w-80 flex-col bg-white">
           <div className="flex h-20 items-center justify-between px-6">
             <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
             <button
@@ -104,7 +103,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="px-4 py-6">
+          <nav className="px-4 py-6 overflow-y-auto">
             <ul className="space-y-3">
               {navigation.map((item) => {
                 const Icon = item.icon;
@@ -146,17 +145,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-80 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
+      <div className="hidden lg:fixed lg:top-20 lg:bottom-0 lg:flex lg:w-80 lg:flex-col">
+        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 overflow-y-auto">
           <div className="flex h-20 items-center justify-between px-6">
             <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
-            <button
-              onClick={refreshPendingCount}
-              className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
-              title="Refresh pending count"
-            >
-              <RefreshCw className="h-5 w-5" />
-            </button>
           </div>
           <nav className="px-4 py-6">
             <ul className="space-y-3">

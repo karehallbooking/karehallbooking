@@ -11,21 +11,21 @@ export function Notifications() {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!currentUser) return;
-      
-      try {
-        setLoading(true);
-        const userNotifications = await FirestoreService.getUserNotifications(currentUser.uid);
-        setNotifications(userNotifications);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!currentUser) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
 
-    fetchNotifications();
+    setLoading(true);
+    const unsubscribe = FirestoreService.subscribeToUserNotifications(currentUser.uid, (items) => {
+      setNotifications(items);
+      setLoading(false);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [currentUser]);
 
   const getIcon = (type: string) => {
@@ -41,8 +41,8 @@ export function Notifications() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateValue: any) => {
+    const date = dateValue?.toDate ? dateValue.toDate() : new Date(dateValue);
     return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 

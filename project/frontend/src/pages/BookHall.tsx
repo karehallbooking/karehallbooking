@@ -69,14 +69,8 @@ export function BookHall() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {halls.map((hall) => (
-            <div key={hall.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <img
-                src={hall.image}
-                alt={hall.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{hall.name}</h3>
+            <div key={hall.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200">
+              <h3 className="text-xl font-extrabold text-gray-900 mb-3 tracking-tight">{hall.name}</h3>
                 
                 <div className="flex items-center space-x-4 mb-4 text-gray-600">
                   <div className="flex items-center space-x-1">
@@ -90,12 +84,12 @@ export function BookHall() {
                 </div>
 
                 <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Available Facilities:</h4>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-2">Available Facilities:</h4>
                   <div className="flex flex-wrap gap-2">
                     {hall.facilities.map((facility) => (
                       <span
                         key={facility}
-                        className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
+                        className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full font-medium"
                       >
                         {facility}
                       </span>
@@ -123,7 +117,6 @@ export function BookHall() {
                   </Link>
                 </div>
               </div>
-            </div>
           ))}
         </div>
       </div>

@@ -365,13 +365,18 @@ export class FirestoreService {
     }
   }
 
-  // Check hall availability for a specific date
-  static async checkHallAvailability(hallName: string, date: string): Promise<{
+  // Check hall availability for a specific date and time range
+  static async checkHallAvailability(hallName: string, date: string, timeFrom: string, timeTo: string): Promise<{
     available: boolean;
     reason?: string;
   }> {
     try {
-      // Validate date is within 1 month
+      // Basic validation
+      if (!hallName || !date || !timeFrom || !timeTo) {
+        return { available: false, reason: 'Missing date or time.' };
+      }
+
+      // Validate date within 1 month window as before
       const selectedDate = new Date(date);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -387,7 +392,7 @@ export class FirestoreService {
         return { available: false, reason: 'Bookings allowed only within 1 month from today' };
       }
 
-      // Check for existing bookings on this date
+      // Fetch bookings on the same date for this hall with pending/approved status
       const q = query(
         collection(db, collections.bookings),
         where('hallName', '==', hallName),
@@ -396,14 +401,131 @@ export class FirestoreService {
       );
       
       const snapshot = await getDocs(q);
-      
-      if (!snapshot.empty) {
-        return { available: false, reason: 'Hall is already booked on this date' };
+
+      // Convert HH:MM to minutes helper
+      const toMinutes = (t: string) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+
+      const newStart = toMinutes(timeFrom);
+      const newEnd = toMinutes(timeTo);
+
+      if (newEnd <= newStart) {
+        return { available: false, reason: 'End time must be after start time' };
+      }
+
+      // Check overlaps with existing bookings
+      const hasOverlap = snapshot.docs.some((docSnap: any) => {
+        const b = docSnap.data() as Booking;
+        const existingStart = toMinutes(b.timeFrom);
+        const existingEnd = toMinutes(b.timeTo);
+        return newStart < existingEnd && newEnd > existingStart;
+      });
+
+      if (hasOverlap) {
+        return { available: false, reason: 'Selected time overlaps with another booking' };
       }
 
       return { available: true };
     } catch (error) {
       console.error('Error checking hall availability:', error);
+      return { available: false, reason: 'Error checking availability. Please try again.' };
+    }
+  }
+
+  // New: Check availability for From/To range (supports same-day and multi-day)
+  static async checkHallAvailabilityRange(
+    hallName: string,
+    fromDate: string,
+    fromTime: string,
+    toDate: string,
+    toTime: string
+  ): Promise<{ available: boolean; reason?: string }> {
+    try {
+      if (!hallName || !fromDate || !fromTime || !toDate || !toTime) {
+        return { available: false, reason: 'Missing date or time.' };
+      }
+
+      const start = new Date(fromDate);
+      const end = new Date(toDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const maxDate = new Date();
+      maxDate.setDate(today.getDate() + 30);
+      maxDate.setHours(23, 59, 59, 999);
+
+      if (start < today) return { available: false, reason: 'Cannot book for past dates' };
+      if (end > maxDate) return { available: false, reason: 'Bookings allowed only within 1 month from today' };
+
+      // Ensure chronological
+      if (end.getTime() < start.getTime()) {
+        return { available: false, reason: 'End date must be after or equal to start date' };
+      }
+
+      const toMinutes = (t: string) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+      const newStart = toMinutes(fromTime);
+      const newEnd = toMinutes(toTime);
+      if (start.getTime() === end.getTime() && newEnd <= newStart) {
+        return { available: false, reason: 'End time must be after start time' };
+      }
+
+      // Build date list inclusive
+      const dates: string[] = [];
+      for (let d = new Date(start); d.getTime() <= end.getTime(); d.setDate(d.getDate() + 1)) {
+        dates.push(d.toISOString().split('T')[0]);
+      }
+
+      // For each date, fetch bookings and check overlap window
+      for (let i = 0; i < dates.length; i++) {
+        const date = dates[i];
+        const q = query(
+          collection(db, collections.bookings),
+          where('hallName', '==', hallName),
+          where('dates', 'array-contains', date),
+          where('status', 'in', ['pending', 'approved'])
+        );
+        const snapshot = await getDocs(q);
+
+        // Determine window for this specific day
+        let windowStart = 0; // minutes from 00:00
+        let windowEnd = 24 * 60; // exclusive
+        if (i === 0 && i === dates.length - 1) {
+          // same-day range
+          windowStart = newStart;
+          windowEnd = newEnd;
+        } else if (i === 0) {
+          // first day: from fromTime to end of day
+          windowStart = newStart;
+          windowEnd = 24 * 60;
+        } else if (i === dates.length - 1) {
+          // last day: start of day to toTime
+          windowStart = 0;
+          windowEnd = newEnd;
+        } else {
+          // middle day: any time overlaps
+          windowStart = 0;
+          windowEnd = 24 * 60;
+        }
+
+        const hasOverlap = snapshot.docs.some((docSnap: any) => {
+          const b = docSnap.data() as Booking;
+          const existingStart = toMinutes(b.timeFrom);
+          const existingEnd = toMinutes(b.timeTo);
+          return windowStart < existingEnd && windowEnd > existingStart;
+        });
+
+        if (hasOverlap) {
+          return { available: false, reason: `Overlaps with an existing booking on ${date}` };
+        }
+      }
+
+      return { available: true };
+    } catch (e) {
+      console.error('Error checking cross-day availability:', e);
       return { available: false, reason: 'Error checking availability. Please try again.' };
     }
   }

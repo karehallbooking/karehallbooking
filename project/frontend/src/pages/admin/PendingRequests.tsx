@@ -27,36 +27,33 @@ export function PendingRequests() {
     }
   };
 
+  const createStatusNotification = async (targetUserId: string, status: 'approved' | 'rejected', hallName: string, purpose?: string, adminComments?: string) => {
+    const title = status === 'approved' ? 'Booking Approved! 🎉' : 'Booking Rejected';
+    const message = status === 'approved'
+      ? `Your booking for "${hallName}"${purpose ? ` (${purpose})` : ''} has been approved!`
+      : `Your booking for "${hallName}"${purpose ? ` (${purpose})` : ''} has been rejected.${adminComments ? ` Reason: ${adminComments}` : ''}`;
+    await FirestoreService.createNotification({
+      userId: targetUserId,
+      title,
+      message,
+      type: status === 'approved' ? 'success' : 'error',
+      read: false,
+      createdAt: new Date().toISOString()
+    } as any);
+  };
+
   const handleApprove = async (bookingId: string) => {
     try {
       setProcessing(bookingId);
-      console.log(`🔄 Calling backend API to approve booking: ${bookingId}`);
-      
-      // Get Firebase token for authentication
-      const { auth } = await import('../../config/firebase');
-      const { getAuth } = await import('firebase/auth');
-      const user = getAuth().currentUser;
-      if (!user) throw new Error('User not authenticated');
-      
-      const token = await user.getIdToken();
-      
-      // Call backend API for approval
-      const response = await fetch(`https://karehallbooking-g695.onrender.com/api/admin/bookings/${bookingId}/approve`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({})
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Backend approval failed: ${response.status} ${errorText}`);
-      }
-      
-      console.log(`✅ Backend approval successful for booking: ${bookingId}`);
-      await loadPendingBookings(); // Reload data
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) throw new Error('Booking not found');
+
+      // Update booking status directly in Firestore
+      await FirestoreService.updateBooking(bookingId, { status: 'approved' as any, updatedAt: new Date().toISOString() as any });
+      // Notify user
+      await createStatusNotification(booking.userId, 'approved', booking.hallName, booking.purpose);
+
+      await loadPendingBookings();
     } catch (error) {
       console.error('Error approving booking:', error);
       alert(`Failed to approve booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -68,33 +65,13 @@ export function PendingRequests() {
   const handleReject = async (bookingId: string) => {
     try {
       setProcessing(bookingId);
-      console.log(`🔄 Calling backend API to reject booking: ${bookingId}`);
-      
-      // Get Firebase token for authentication
-      const { auth } = await import('../../config/firebase');
-      const { getAuth } = await import('firebase/auth');
-      const user = getAuth().currentUser;
-      if (!user) throw new Error('User not authenticated');
-      
-      const token = await user.getIdToken();
-      
-      // Call backend API for rejection
-      const response = await fetch(`https://karehallbooking-g695.onrender.com/api/admin/bookings/${bookingId}/reject`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({})
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Backend rejection failed: ${response.status} ${errorText}`);
-      }
-      
-      console.log(`✅ Backend rejection successful for booking: ${bookingId}`);
-      await loadPendingBookings(); // Reload data
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) throw new Error('Booking not found');
+
+      await FirestoreService.updateBooking(bookingId, { status: 'rejected' as any, updatedAt: new Date().toISOString() as any });
+      await createStatusNotification(booking.userId, 'rejected', booking.hallName, booking.purpose);
+
+      await loadPendingBookings();
     } catch (error) {
       console.error('Error rejecting booking:', error);
       alert(`Failed to reject booking: ${error instanceof Error ? error.message : 'Unknown error'}`);

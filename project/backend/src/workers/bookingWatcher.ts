@@ -1,7 +1,7 @@
 import { db, collections } from '../config/firebase';
 import admin from 'firebase-admin';
 import { sendMail } from '../utils/mailer';
-import { bookingReceivedUser, bookingReceivedAdmin } from '../utils/emailTemplates';
+import { bookingReceivedUser, bookingReceivedAdmin, bookingApproved, bookingRejected } from '../utils/emailTemplates';
 
 function getString(field: any): string | undefined {
   if (field === undefined || field === null) return undefined;
@@ -23,6 +23,49 @@ export function startBookingWatcher(): void {
       return Date.parse(String(value));
     } catch {
       return null;
+    }
+  }
+
+  async function sendStatusChangeEmail(bookingId: string, b: any, status: 'approved' | 'rejected') {
+    const userEmail = getString(b.userEmail) || getString(b.email);
+    if (!userEmail) {
+      console.log(`❌ No user email for booking ${bookingId}; skip status email`);
+      return;
+    }
+
+    const hallName = getString(b.hallName) || getString(b.hall) || 'Hall';
+    const emailData = {
+      bookingId,
+      hallName,
+      dates: (b.dates || []) as string[],
+      timeFrom: getString(b.timeFrom) || '',
+      timeTo: getString(b.timeTo) || '',
+      purpose: getString(b.purpose) || '',
+      peopleCount: b.seatingCapacity as number | undefined,
+      bookedBy: getString(b.userName),
+      contact: getString(b.userMobile),
+      rejectionReason: getString(b.adminComments)
+    } as any;
+
+    try {
+      if (status === 'approved') {
+        await sendMail({
+          to: userEmail,
+          subject: `Your booking is approved ✅ — ${hallName}`,
+          html: bookingApproved(emailData),
+          text: `Your booking is approved. View: https://karehallbooking.netlify.app/my-bookings/${bookingId}`
+        });
+      } else {
+        await sendMail({
+          to: userEmail,
+          subject: `Update on your booking request — ${hallName}`,
+          html: bookingRejected(emailData),
+          text: `Your booking was not approved.${emailData.rejectionReason ? ' Reason: ' + emailData.rejectionReason : ''} Try again: https://karehallbooking.netlify.app/book`
+        });
+      }
+      console.log(`✅ Status email (${status}) sent to ${userEmail} for ${bookingId}`);
+    } catch (e: any) {
+      console.error(`❌ Status email (${status}) failed for ${bookingId}:`, e?.message || e);
     }
   }
 
@@ -93,16 +136,18 @@ export function startBookingWatcher(): void {
             console.error('❌ Booking watcher create error:', err?.message || err);
           }
         } else if (change.type === 'modified') {
-          // Handle status changes - just log for monitoring, emails are sent directly by admin routes
+          // Handle status changes - now send emails directly here
           const prev = lastStatus.get(bookingId);
           const current = getString(b.status);
           console.log(`🔄 Booking ${bookingId} status changed: ${prev} → ${current}`);
           lastStatus.set(bookingId, current);
           
-          // Note: Status change emails are now handled directly in admin routes
-          // to avoid duplicate emails and Firestore listener reliability issues on Render
-          if (current === 'approved' || current === 'rejected') {
-            console.log(`📧 Status change email should be sent by admin route for booking ${bookingId}`);
+          if (current && current !== prev) {
+            if (current === 'approved') {
+              await sendStatusChangeEmail(bookingId, b, 'approved');
+            } else if (current === 'rejected') {
+              await sendStatusChangeEmail(bookingId, b, 'rejected');
+            }
           }
         }
       });

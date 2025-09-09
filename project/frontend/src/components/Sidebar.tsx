@@ -78,7 +78,7 @@ export function Sidebar() {
   const menuItems = currentUser?.role === 'admin' ? adminMenuItems : userMenuItems;
 
   return (
-    <div className="bg-white w-full h-full shadow-lg border-r border-gray-200">
+    <div className="bg-white w-full h-screen overflow-y-auto shadow-lg border-r border-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
       <div className="p-6">
         <div className="text-center">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
@@ -92,7 +92,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="px-4">
+      <nav className="px-4 pb-6">
         <ul className="space-y-3">
           {menuItems.map((item) => {
             const Icon = item.icon;
