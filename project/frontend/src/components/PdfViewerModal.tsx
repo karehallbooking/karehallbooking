@@ -20,10 +20,14 @@ export const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose,
       setLoading(true);
       setError('');
       try {
-        // Try proxy first to bypass hotlink/CORS on Cloudinary
-        const encoded = encodeURIComponent(url);
-        const proxyUrl = `https://karehallbooking-g695.onrender.com/api/uploads/proxy?url=${encoded}`;
-        const res = await fetch(proxyUrl);
+        // Try direct first (we serve PDFs from our backend GridFS)
+        let res = await fetch(url);
+        if (!res.ok) {
+          // Fallback to proxy if the direct request is blocked by CSP/CORS
+          const encoded = encodeURIComponent(url);
+          const proxyUrl = `https://karehallbooking-g695.onrender.com/api/uploads/proxy?url=${encoded}`;
+          res = await fetch(proxyUrl);
+        }
         if (!res.ok) {
           // Fallback: load direct URL
           setBlobUrl(url);

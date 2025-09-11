@@ -6,63 +6,7 @@ import crypto from 'crypto';
 
 const router = express.Router();
 
-// POST /api/uploads/signature
-// Returns a signed payload for Cloudinary raw uploads with access_mode=public
-// Allow CORS explicitly for this endpoint (frontend may run from multiple origins)
-router.options('/signature', cors());
-router.post('/signature', cors(), async (req, res) => {
-  try {
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
-
-    if (!cloudName || !apiKey || !apiSecret) {
-      return res.status(500).json({
-        success: false,
-        message: 'Cloudinary environment variables are not configured',
-        error: 'CLOUDINARY_CONFIG_MISSING'
-      });
-    }
-
-    // simple health probe when requested: { "health": true }
-    if (req.query.health === 'true') {
-      return res.json({
-        success: true,
-        message: 'Cloudinary configuration present',
-        cloud_name: cloudName,
-        api_key: apiKey
-      });
-    }
-
-    const timestamp = Math.floor(Date.now() / 1000);
-    const paramsToSign = `access_mode=public&timestamp=${timestamp}`;
-    const signature = crypto
-      .createHash('sha1')
-      .update(paramsToSign + apiSecret)
-      .digest('hex');
-
-    // Explicit CORS headers (defensive in case upstream proxy strips them)
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-
-    return res.json({
-      success: true,
-      timestamp,
-      signature,
-      access_mode: 'public',
-      cloud_name: cloudName,
-      api_key: apiKey,
-      upload_url: `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`
-    });
-  } catch (err: any) {
-    return res.status(500).json({
-      success: false,
-      message: err?.message || 'Failed to generate signature',
-      error: 'SIGNATURE_ERROR'
-    });
-  }
-});
+// (Removed Cloudinary signature route — not used after migrating to GridFS)
 
 // ===== MongoDB GridFS setup =====
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://kotarisandeep198_db_user:e5upm3bxvSMcQGwr@sandeephallbooking.dk27kdn.mongodb.net/?retryWrites=true&w=majority&appName=SandeepHallbooking';
@@ -193,8 +137,11 @@ router.get('/proxy', cors(), async (req: express.Request, res: express.Response)
       return;
     }
     const url = new URL(target);
-    if (!/\.cloudinary\.com$/i.test(url.hostname) && !/^res\.cloudinary\.com$/i.test(url.hostname)) {
-      res.status(400).json({ success: false, message: 'Only Cloudinary URLs are allowed', error: 'INVALID_HOST' });
+    const reqHost = (req.get('x-forwarded-host') || req.get('host') || '').split(',')[0].trim();
+    const sameHostAllowed = reqHost && (url.hostname === reqHost || url.hostname === reqHost.split(':')[0]);
+    const isCloudinary = /\.cloudinary\.com$/i.test(url.hostname) || /^res\.cloudinary\.com$/i.test(url.hostname);
+    if (!sameHostAllowed && !isCloudinary) {
+      res.status(400).json({ success: false, message: 'Host not allowed', error: 'INVALID_HOST' });
       return;
     }
 
@@ -209,6 +156,9 @@ router.get('/proxy', cors(), async (req: express.Request, res: express.Response)
     const buffer = Buffer.from(await upstream.arrayBuffer());
     res.setHeader('Content-Type', contentType);
     res.setHeader('Cache-Control', 'public, max-age=300');
+    // Ensure no frame restrictions are inherited on proxied binary responses
+    res.removeHeader('X-Frame-Options');
+    res.setHeader('Content-Security-Policy', "frame-ancestors 'self' https://*.vercel.app http://localhost:5173");
     res.status(200).send(buffer);
     return;
   } catch (err: any) {
