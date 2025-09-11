@@ -51,31 +51,13 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// CORS configuration
+// CORS configuration (permissive - allows all origins; tighten later if needed)
 const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      process.env.FRONTEND_URL || 'http://localhost:5173',
-      'http://localhost:3000',
-      'http://localhost:5000',
-      'https://kare-hall-booking.web.app',
-      'https://kare-hall-booking.firebaseapp.com',
-      'https://karehallbooking.netlify.app'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-};
+} as const;
 
 app.use(cors(corsOptions));
 
@@ -121,7 +103,8 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/uploads', uploadRoutes);
+// Allow permissive CORS specifically for uploads signature endpoint
+app.use('/api/uploads', cors(), uploadRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
