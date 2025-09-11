@@ -71,22 +71,35 @@ const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'karehallbooking';
 let client: MongoClient | null = null;
 let bucket: GridFSBucket | null = null;
 
-async function getBucket(): Promise<GridFSBucket> {
-  if (bucket) return bucket;
-  if (!client) {
-    client = new MongoClient(MONGODB_URI, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: false,
-        deprecationErrors: true
-      }
-    });
-    await client.connect();
-    try { await client.db('admin').command({ ping: 1 }); } catch { /* ignore */ }
+async function ensureMongoConnected(): Promise<void> {
+  try {
+    if (client) {
+      await client.db('admin').command({ ping: 1 });
+      return;
+    }
+  } catch {
+    try { await client?.close(); } catch { /* noop */ }
+    client = null;
   }
-  const db = client.db(MONGODB_DB_NAME);
-  bucket = new GridFSBucket(db, { bucketName: 'pdfs' });
-  return bucket;
+
+  client = new MongoClient(MONGODB_URI, {
+    maxPoolSize: 10,
+    connectTimeoutMS: 15000,
+    socketTimeoutMS: 45000,
+    retryWrites: true,
+    serverApi: { version: ServerApiVersion.v1, strict: false, deprecationErrors: true }
+  });
+  await client.connect();
+  await client.db('admin').command({ ping: 1 });
+}
+
+async function getBucket(): Promise<GridFSBucket> {
+  await ensureMongoConnected();
+  if (!bucket) {
+    const db = (client as MongoClient).db(MONGODB_DB_NAME);
+    bucket = new GridFSBucket(db, { bucketName: 'pdfs' });
+  }
+  return bucket as GridFSBucket;
 }
 
 // Multer memory storage (we stream into GridFS)
@@ -108,7 +121,14 @@ router.post('/pdf', cors(), upload.single('file'), async (req: MulterRequest, re
       res.status(400).json({ success: false, message: 'No file uploaded', error: 'NO_FILE' });
       return;
     }
-    const b = await getBucket();
+    let b: GridFSBucket;
+    try {
+      b = await getBucket();
+    } catch (e: any) {
+      // Attempt one reconnect if topology was closed
+      await ensureMongoConnected();
+      b = await getBucket();
+    }
     const filename = req.file.originalname || 'document.pdf';
     const uploadStream = b.openUploadStream(filename, { contentType: 'application/pdf' });
     uploadStream.end(req.file.buffer);
