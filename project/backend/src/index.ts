@@ -52,12 +52,12 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS configuration (permissive - allows all origins; tighten later if needed)
-const corsOptions = {
-  origin: true,
+const corsOptions: import('cors').CorsOptions = {
+  origin: (_origin, callback) => callback(null, true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-} as const;
+};
 
 app.use(cors(corsOptions));
 
