@@ -54,10 +54,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const userDoc = await getDoc(doc(db, collections.users, firebaseUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data() as User;
-            setCurrentUser({
+            const user: User = {
               ...userData,
               uid: firebaseUser.uid
-            });
+            };
+            console.log('🔍 User data from Firestore:', user);
+            console.log('🔍 User role:', user.role);
+            console.log('🔍 User email:', user.email);
+            
+            // Force admin role for admin email
+            if (firebaseUser.email === 'karehallbooking@gmail.com' && user.role !== 'admin') {
+              console.log('🔧 Forcing admin role for admin email');
+              await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+                role: 'admin',
+                name: 'KARE Hall Admin',
+                department: 'Administration'
+              });
+              user.role = 'admin';
+              user.name = 'KARE Hall Admin';
+              user.department = 'Administration';
+              console.log('🔧 Admin role updated, user object:', user);
+            }
+            
+            setCurrentUser(user);
+            
           } else {
             // User document doesn't exist, create it
             const isAdmin = firebaseUser.email === 'karehallbooking@gmail.com';
@@ -65,16 +85,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               uid: firebaseUser.uid,
               name: isAdmin ? 'KARE Hall Admin' : (firebaseUser.displayName || 'User'),
               email: firebaseUser.email || '',
-              mobile: isAdmin ? '9876543210' : '',
+              mobile: '',
               department: isAdmin ? 'Administration' : '',
               role: isAdmin ? 'admin' : 'user'
             };
+            console.log('🔍 Creating new user:', newUser);
+            console.log('🔍 Is admin email?', isAdmin);
             await setDoc(doc(db, collections.users, firebaseUser.uid), {
               ...newUser,
               createdAt: new Date(),
               lastLogin: new Date()
             });
             setCurrentUser(newUser);
+            
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -143,8 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         return user;
       } else {
-        // New user, create profile
-        const isAdmin = firebaseUser.email === 'karehallbooking@gmail.com';
+        // New user, create profile as regular user
         const newUser: User = {
           uid: firebaseUser.uid,
           name: firebaseUser.displayName || 'User',
@@ -152,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           mobile: '',
           designation: 'Faculty',
           department: '',
-          role: isAdmin ? 'admin' : 'user'
+          role: 'user'
         };
         
         await setDoc(doc(db, collections.users, firebaseUser.uid), {
@@ -207,13 +229,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
       const firebaseUser = userCredential.user;
       
-      // Check if this is the admin email
-      const isAdmin = userData.email === 'karehallbooking@gmail.com';
-      
+      // Create user as regular user (admin promotion handled separately)
       const newUser: User = {
         ...userInfo,
         uid: firebaseUser.uid,
-        role: isAdmin ? 'admin' : 'user'
+        role: 'user'
       };
       
       // Save user data to Firestore

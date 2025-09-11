@@ -101,6 +101,9 @@ export function Notifications() {
                 key={notification.id}
                 className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${
                   notification.read ? 'border-gray-200' : 'border-primary'
+                } ${
+                  (notification.title.includes('REJECTED') || notification.title.includes('Rejected')) ? 'border-l-red-500 bg-red-50' : 
+                  (notification.title.includes('APPROVED') || notification.title.includes('Approved')) ? 'border-l-green-500 bg-green-50' : ''
                 }`}
               >
                 <div className="flex items-start space-x-4">
@@ -109,10 +112,18 @@ export function Notifications() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className={`text-lg font-semibold ${
+                      <h3 className={`text-xl font-bold ${
                         notification.read ? 'text-gray-600' : 'text-gray-800'
+                      } ${
+                        notification.title.includes('REJECTED') || notification.title.includes('Rejected') ? 'text-red-600' : 
+                        notification.title.includes('APPROVED') || notification.title.includes('Approved') ? 'text-green-600' : ''
                       }`}>
-                        {notification.title}
+                        {notification.title.includes('Rejected') && !notification.title.includes('❌') 
+                          ? notification.title.replace('Rejected', 'REJECTED ❌')
+                          : notification.title.includes('Approved') && !notification.title.includes('🎉') && !notification.title.includes('✅')
+                          ? notification.title.replace('Approved', 'APPROVED! 🎉')
+                          : notification.title
+                        }
                       </h3>
                       <div className="flex items-center space-x-2">
                         {!notification.read && (
@@ -128,11 +139,62 @@ export function Notifications() {
                         )}
                       </div>
                     </div>
-                    <p className={`${
+                    <div className={`${
                       notification.read ? 'text-gray-500' : 'text-gray-700'
                     } mb-2`}>
-                      {notification.message}
-                    </p>
+                      {notification.message.split('\n').map((line, index) => {
+                        // Skip lines that are part of the rejection reason section
+                        if (line.includes('REJECTION REASON:') || (index > 0 && notification.message.split('\n')[index - 1].includes('REJECTION REASON:'))) {
+                          return null;
+                        }
+                        
+                        if (line.includes('REJECTED') && !line.includes('REJECTION REASON:')) {
+                          return (
+                            <div key={index}>
+                              <p className="font-semibold text-lg">{line}</p>
+                              {/* Show rejection reason in highlighted box for both old and new formats */}
+                              {(notification.message.includes('REJECTION REASON:') || notification.message.includes('Reason:')) && (
+                                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                  <p className="text-red-800 font-semibold text-sm mb-1">
+                                    📝 REJECTION REASON:
+                                  </p>
+                                  <p className="text-red-700 text-sm font-medium">
+                                    {notification.message.includes('REJECTION REASON:') 
+                                      ? notification.message.split('REJECTION REASON:')[1]?.trim()
+                                      : notification.message.split('Reason:')[1]?.trim()
+                                    }
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                        
+                        // Handle old format where reason is inline
+                        if (line.includes('Reason:') && !line.includes('REJECTION REASON:')) {
+                          const [mainText, reason] = line.split('Reason:');
+                          return (
+                            <div key={index}>
+                              <p className="font-semibold text-lg">{mainText.trim()}</p>
+                              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-red-800 font-semibold text-sm mb-1">
+                                  📝 REJECTION REASON:
+                                </p>
+                                <p className="text-red-700 text-sm font-medium">
+                                  {reason?.trim()}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <p key={index} className={line.includes('APPROVED') ? 'font-semibold text-lg' : ''}>
+                            {line}
+                          </p>
+                        );
+                      })}
+                    </div>
                     <p className="text-sm text-gray-500">
                       {formatDate(notification.createdAt)}
                     </p>

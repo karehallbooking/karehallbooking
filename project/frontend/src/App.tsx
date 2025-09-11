@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { NotificationProvider } from './components/NotificationToast';
+import { DashboardLayout } from './components/DashboardLayout';
 
 // Pages
 import { Home } from './pages/Home';
@@ -32,52 +34,89 @@ import { CancelRequests } from './pages/admin/CancelRequests';
 function AppContent() {
   const { currentUser } = useAuth();
 
+  // Debug logging
+  console.log('🔍 AppContent - currentUser:', currentUser);
+  console.log('🔍 AppContent - user role:', currentUser?.role);
+  console.log('🔍 AppContent - current path:', window.location.pathname);
+
   return (
     <Routes>
-      <Route path="/" element={currentUser ? <Navigate to="/dashboard" replace /> : <Home />} />
-      <Route path="/login" element={currentUser ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/register" element={currentUser ? <Navigate to="/dashboard" replace /> : <Register />} />
+      <Route path="/" element={currentUser ? (currentUser.role === 'admin' ? <Navigate to="/admin/dashboard" replace /> : <Navigate to="/dashboard" replace />) : <Home />} />
+      <Route path="/login" element={currentUser ? (currentUser.role === 'admin' ? <Navigate to="/admin/dashboard" replace /> : <Navigate to="/dashboard" replace />) : <Login />} />
+      <Route path="/register" element={currentUser ? (currentUser.role === 'admin' ? <Navigate to="/admin/dashboard" replace /> : <Navigate to="/dashboard" replace />) : <Register />} />
       <Route path="/setup-admin" element={<SetupAdmin />} />
       
       {/* User Routes */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          <Dashboard />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <Dashboard />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/profile" element={
         <ProtectedRoute>
-          <Profile />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <Profile />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/book-hall" element={
         <ProtectedRoute>
-          <BookHall />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <BookHall />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/book-hall/:hallId" element={
         <ProtectedRoute>
-          <BookingForm />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <BookingForm />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/pending" element={
         <ProtectedRoute>
-          <PendingRequests />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <PendingRequests />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/upcoming" element={
         <ProtectedRoute>
-          <UpcomingEvents />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <UpcomingEvents />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/history" element={
         <ProtectedRoute>
-          <EventsHistory />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <EventsHistory />
+          )}
         </ProtectedRoute>
       } />
       <Route path="/dashboard/notifications" element={
         <ProtectedRoute>
-          <Notifications />
+          {currentUser?.role === 'admin' ? (
+            <Navigate to="/admin/dashboard" replace />
+          ) : (
+            <Notifications />
+          )}
         </ProtectedRoute>
       } />
 
@@ -153,9 +192,11 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <NotificationProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

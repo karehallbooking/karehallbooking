@@ -3,11 +3,23 @@ import { Clock, User, Calendar, MapPin, CheckCircle, XCircle } from 'lucide-reac
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
+import { RejectionModal } from '../../components/RejectionModal';
+import { useNotification } from '../../components/NotificationToast';
 
 export function PendingRequests() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [rejectionModal, setRejectionModal] = useState<{
+    isOpen: boolean;
+    bookingId: string | null;
+    bookingTitle: string;
+  }>({
+    isOpen: false,
+    bookingId: null,
+    bookingTitle: ''
+  });
+  const { showSuccess, showError } = useNotification();
 
   useEffect(() => {
     loadPendingBookings();
@@ -28,10 +40,10 @@ export function PendingRequests() {
   };
 
   const createStatusNotification = async (targetUserId: string, status: 'approved' | 'rejected', hallName: string, purpose?: string, adminComments?: string) => {
-    const title = status === 'approved' ? 'Booking Approved! 🎉' : 'Booking Rejected';
+    const title = status === 'approved' ? 'BOOKING APPROVED! 🎉' : 'BOOKING REJECTED ❌';
     const message = status === 'approved'
-      ? `Your booking for "${hallName}"${purpose ? ` (${purpose})` : ''} has been approved!`
-      : `Your booking for "${hallName}"${purpose ? ` (${purpose})` : ''} has been rejected.${adminComments ? ` Reason: ${adminComments}` : ''}`;
+      ? `✅ Your booking for "${hallName}"${purpose ? ` (${purpose})` : ''} has been APPROVED!`
+      : `❌ Your booking for "${hallName}"${purpose ? ` (${purpose})` : ''} has been REJECTED.${adminComments ? `\n\n📝 REJECTION REASON:\n"${adminComments}"` : ''}`;
     await FirestoreService.createNotification({
       userId: targetUserId,
       title,
@@ -53,30 +65,53 @@ export function PendingRequests() {
       // Notify user
       await createStatusNotification(booking.userId, 'approved', booking.hallName, booking.purpose);
 
+      showSuccess('Booking Approved', 'Booking has been approved successfully');
       await loadPendingBookings();
     } catch (error) {
       console.error('Error approving booking:', error);
-      alert(`Failed to approve booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showError('Approval Failed', `Failed to approve booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setProcessing(null);
     }
   };
 
-  const handleReject = async (bookingId: string) => {
+  const handleReject = (bookingId: string) => {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) return;
+    
+    setRejectionModal({
+      isOpen: true,
+      bookingId,
+      bookingTitle: `${booking.hallName} - ${booking.purpose}`
+    });
+  };
+
+  const handleRejectConfirm = async (reason: string) => {
+    if (!rejectionModal.bookingId) return;
+    
     try {
-      setProcessing(bookingId);
-      const booking = bookings.find(b => b.id === bookingId);
+      setProcessing(rejectionModal.bookingId);
+      const booking = bookings.find(b => b.id === rejectionModal.bookingId);
       if (!booking) throw new Error('Booking not found');
 
-      await FirestoreService.updateBooking(bookingId, { status: 'rejected' as any, updatedAt: new Date().toISOString() as any });
-      await createStatusNotification(booking.userId, 'rejected', booking.hallName, booking.purpose);
+      // Update booking with rejection reason
+      await FirestoreService.updateBooking(rejectionModal.bookingId, { 
+        status: 'rejected' as any, 
+        rejectionReason: reason,
+        updatedAt: new Date().toISOString() as any 
+      });
+      
+      // Create notification with rejection reason
+      await createStatusNotification(booking.userId, 'rejected', booking.hallName, booking.purpose, reason);
 
+      showSuccess('Booking Rejected', 'Booking has been rejected with reason provided');
       await loadPendingBookings();
     } catch (error) {
       console.error('Error rejecting booking:', error);
-      alert(`Failed to reject booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showError('Rejection Failed', `Failed to reject booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setProcessing(null);
+      setRejectionModal({ isOpen: false, bookingId: null, bookingTitle: '' });
     }
   };
 
@@ -202,6 +237,15 @@ export function PendingRequests() {
         </div>
       )}
       </div>
+
+      {/* Rejection Modal */}
+      <RejectionModal
+        isOpen={rejectionModal.isOpen}
+        onClose={() => setRejectionModal({ isOpen: false, bookingId: null, bookingTitle: '' })}
+        onConfirm={handleRejectConfirm}
+        bookingTitle={rejectionModal.bookingTitle}
+        loading={processing === rejectionModal.bookingId}
+      />
     </AdminLayout>
   );
 }

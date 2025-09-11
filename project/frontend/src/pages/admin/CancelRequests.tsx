@@ -3,11 +3,23 @@ import { Clock, User, Calendar, MapPin, CheckCircle, XCircle } from 'lucide-reac
 import { AdminLayout } from '../../components/AdminLayout';
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking } from '../../types';
+import { RejectionModal } from '../../components/RejectionModal';
+import { useNotification } from '../../components/NotificationToast';
 
 export function CancelRequests() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [rejectionModal, setRejectionModal] = useState<{
+    isOpen: boolean;
+    bookingId: string | null;
+    bookingTitle: string;
+  }>({
+    isOpen: false,
+    bookingId: null,
+    bookingTitle: ''
+  });
+  const { showSuccess, showError } = useNotification();
 
   useEffect(() => {
     loadCancelRequests();
@@ -29,33 +41,82 @@ export function CancelRequests() {
   const approveCancellation = async (bookingId: string) => {
     try {
       setProcessing(bookingId);
+      const booking = bookings.find(b => b.id === bookingId);
+      
       await FirestoreService.updateBooking(bookingId, {
         status: 'cancelled',
         reviewStatus: 'resolved' as any,
         reviewType: null as any,
         reviewReason: null as any,
       } as any);
+
+      // Create notification for user
+      if (booking) {
+        await FirestoreService.createNotification({
+          userId: booking.userId,
+          title: 'CANCELLATION APPROVED! ✅',
+          message: `✅ Your cancellation request for "${booking.hallName}" has been APPROVED!`,
+          type: 'success',
+          read: false,
+          createdAt: new Date().toISOString()
+        } as any);
+      }
+
+      showSuccess('Cancellation Approved', 'Cancellation request has been approved successfully');
       await loadCancelRequests();
     } catch (e) {
       console.error('approveCancellation error', e);
+      showError('Approval Failed', 'Failed to approve cancellation request. Please try again.');
     } finally {
       setProcessing(null);
     }
   };
 
-  const rejectCancellation = async (bookingId: string) => {
+  const rejectCancellation = (bookingId: string) => {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) return;
+    
+    setRejectionModal({
+      isOpen: true,
+      bookingId,
+      bookingTitle: `${booking.hallName} - ${booking.purpose}`
+    });
+  };
+
+  const handleRejectConfirm = async (reason: string) => {
+    if (!rejectionModal.bookingId) return;
+    
     try {
-      setProcessing(bookingId);
-      await FirestoreService.updateBooking(bookingId, {
+      setProcessing(rejectionModal.bookingId);
+      const booking = bookings.find(b => b.id === rejectionModal.bookingId);
+      
+      await FirestoreService.updateBooking(rejectionModal.bookingId, {
         reviewStatus: 'rejected' as any,
         reviewType: null as any,
         reviewReason: null as any,
+        cancellationRejectionReason: reason,
       } as any);
+
+      // Create notification for user
+      if (booking) {
+        await FirestoreService.createNotification({
+          userId: booking.userId,
+          title: 'CANCELLATION REJECTED ❌',
+          message: `❌ Your cancellation request for "${booking.hallName}" has been REJECTED.\n\n📝 REJECTION REASON:\n"${reason}"`,
+          type: 'error',
+          read: false,
+          createdAt: new Date().toISOString()
+        } as any);
+      }
+
+      showSuccess('Cancellation Rejected', 'Cancellation request has been rejected with reason provided');
       await loadCancelRequests();
     } catch (e) {
       console.error('rejectCancellation error', e);
+      showError('Rejection Failed', 'Failed to reject cancellation request. Please try again.');
     } finally {
       setProcessing(null);
+      setRejectionModal({ isOpen: false, bookingId: null, bookingTitle: '' });
     }
   };
 
@@ -155,9 +216,22 @@ export function CancelRequests() {
           </div>
         )}
       </div>
+
+      {/* Rejection Modal */}
+      <RejectionModal
+        isOpen={rejectionModal.isOpen}
+        onClose={() => setRejectionModal({ isOpen: false, bookingId: null, bookingTitle: '' })}
+        onConfirm={handleRejectConfirm}
+        bookingTitle={rejectionModal.bookingTitle}
+        loading={processing === rejectionModal.bookingId}
+        type="cancellation"
+      />
     </AdminLayout>
   );
 }
+
+
+
 
 
 

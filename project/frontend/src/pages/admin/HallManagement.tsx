@@ -3,6 +3,7 @@ import { Building, Plus, Edit, Trash2, Users, Wifi, Car, Coffee } from 'lucide-r
 import { FirestoreService } from '../../services/firestoreService';
 import { Hall } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
+import { useNotification } from '../../components/NotificationToast';
 
 export function HallManagement() {
   const [halls, setHalls] = useState<Hall[]>([]);
@@ -13,10 +14,10 @@ export function HallManagement() {
     name: '',
     capacity: '',
     facilities: '',
-    image: '',
     available: true
   });
   const [saving, setSaving] = useState(false);
+  const { showSuccess, showError } = useNotification();
 
   useEffect(() => {
     loadHalls();
@@ -45,7 +46,7 @@ export function HallManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.capacity.trim()) {
-      alert('Please fill in all required fields');
+      showError('Validation Error', 'Please fill in all required fields');
       return;
     }
 
@@ -60,7 +61,6 @@ export function HallManagement() {
         name: formData.name.trim(),
         capacity: parseInt(formData.capacity),
         facilities,
-        image: formData.image.trim() || 'https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg',
         available: formData.available
       };
 
@@ -68,9 +68,11 @@ export function HallManagement() {
         // Update existing hall
         await FirestoreService.updateHall(editingHall.id!, hallData);
         setEditingHall(null);
+        showSuccess('Hall Updated!', 'Hall has been updated successfully');
       } else {
         // Create new hall
         await FirestoreService.createHall(hallData);
+        showSuccess('Hall Added!', 'New hall has been added successfully');
       }
 
       // Reset form and reload halls
@@ -78,16 +80,13 @@ export function HallManagement() {
         name: '',
         capacity: '',
         facilities: '',
-        image: '',
         available: true
       });
       setShowAddForm(false);
       await loadHalls();
-      
-      alert(editingHall ? 'Hall updated successfully!' : 'Hall added successfully!');
     } catch (error) {
       console.error('Error saving hall:', error);
-      alert('Failed to save hall. Please try again.');
+      showError('Save Failed', 'Failed to save hall. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -99,7 +98,6 @@ export function HallManagement() {
       name: hall.name,
       capacity: hall.capacity.toString(),
       facilities: hall.facilities.join(', '),
-      image: hall.image || '',
       available: hall.available
     });
     setShowAddForm(true);
@@ -113,10 +111,10 @@ export function HallManagement() {
     try {
       await FirestoreService.deleteHall(hallId);
       await loadHalls();
-      alert('Hall deleted successfully!');
+      showSuccess('Hall Deleted!', 'Hall has been deleted successfully');
     } catch (error) {
       console.error('Error deleting hall:', error);
-      alert('Failed to delete hall. Please try again.');
+      showError('Delete Failed', 'Failed to delete hall. Please try again.');
     }
   };
 
@@ -125,7 +123,6 @@ export function HallManagement() {
       name: '',
       capacity: '',
       facilities: '',
-      image: '',
       available: true
     });
     setEditingHall(null);
@@ -175,23 +172,13 @@ export function HallManagement() {
       {halls.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {halls.map((hall) => (
-            <div key={hall.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative">
-                {hall.image ? (
-                  <img 
-                    src={hall.image} 
-                    alt={hall.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Building className="h-16 w-16 text-white" />
-                )}
-              </div>
-              
-              <div className="p-6">
+            <div key={hall.id} className="bg-white rounded-lg shadow-sm p-6 flex flex-col">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{hall.name}</h3>
+                    <div className="flex items-center space-x-2">
+                      <Building className="h-5 w-5 text-gray-500" />
+                      <h3 className="text-lg font-semibold text-gray-800">{hall.name}</h3>
+                    </div>
                     <div className="flex items-center space-x-2 mt-1">
                       <Users className="h-4 w-4 text-gray-400" />
                       <span className="text-sm text-gray-600">Capacity: {hall.capacity} people</span>
@@ -237,7 +224,6 @@ export function HallManagement() {
                     View Details
                   </button>
                 </div>
-              </div>
             </div>
           ))}
         </div>
@@ -300,17 +286,7 @@ export function HallManagement() {
                   rows={3}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter image URL (optional)"
-                />
-              </div>
+              
               <div className="flex items-center">
                 <input
                   type="checkbox"

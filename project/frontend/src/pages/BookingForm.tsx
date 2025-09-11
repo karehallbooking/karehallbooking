@@ -3,12 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { FirestoreService } from '../services/firestoreService';
+import { useNotification } from '../components/NotificationToast';
 import { User, Phone, Building, FileText, Calendar, CheckCircle, XCircle } from 'lucide-react';
 
 export function BookingForm() {
   const { hallId } = useParams();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
   
   const [hall, setHall] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,10 @@ export function BookingForm() {
     message: string;
   }>({ checking: false, available: null, message: '' });
 
-  const availableFacilities = ['Reception', 'Audio', 'Power Backup'];
+  // Facilities available for this specific hall (fetched from Firestore)
+  const availableFacilities: string[] = Array.isArray(hall?.facilities)
+    ? (hall.facilities as string[])
+    : [];
 
   const generateTimeOptions = () => {
     const options: string[] = [];
@@ -164,15 +169,27 @@ export function BookingForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser || !hall) { alert('User not authenticated or hall not found.'); return; }
+    if (!currentUser || !hall) { 
+      showError('Authentication Error', 'User not authenticated or hall not found.'); 
+      return; 
+    }
 
     const requiredOk = validateRequiredFields();
-    if (!requiredOk.isValid) { alert(requiredOk.message); return; }
+    if (!requiredOk.isValid) { 
+      showError('Validation Error', requiredOk.message); 
+      return; 
+    }
 
     const rangeOk = validateDateTimeRange();
-    if (!rangeOk.isValid) { alert(rangeOk.message); return; }
+    if (!rangeOk.isValid) { 
+      showError('Date/Time Error', rangeOk.message); 
+      return; 
+    }
 
-    if (availabilityStatus.available === false) { alert('This hall is not available for the selected range.'); return; }
+    if (availabilityStatus.available === false) { 
+      showError('Availability Error', 'This hall is not available for the selected range.'); 
+      return; 
+    }
     
     setSubmitting(true);
     try {
@@ -205,7 +222,7 @@ export function BookingForm() {
       setTimeout(() => navigate('/dashboard'), 3000);
     } catch (err) {
       console.error('Error submitting booking:', err);
-      alert('Failed to submit booking request. Please try again.');
+      showError('Submission Failed', 'Failed to submit booking request. Please try again.');
     } finally {
       setSubmitting(false);
     }

@@ -78,29 +78,16 @@ export function Sidebar() {
   const menuItems = currentUser?.role === 'admin' ? adminMenuItems : userMenuItems;
 
   return (
-    <div className="bg-white w-full h-screen overflow-y-auto shadow-lg border-r border-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-      <div className="p-6">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="h-8 w-8 text-white" />
-          </div>
-          <h3 className="font-semibold text-gray-800">{currentUser?.name}</h3>
-          <p className="text-sm text-gray-600">{currentUser?.designation}</p>
-          <span className="inline-block px-2 py-1 text-xs bg-accent text-white rounded-full mt-2">
-            {currentUser?.role === 'admin' ? 'Administrator' : 'User'}
-          </span>
-        </div>
-      </div>
-
-      <nav className="px-4 pb-6">
-        <ul className="space-y-3">
+    <div className="h-full flex flex-col">
+      <nav className="flex-1 px-4 py-4 overflow-y-auto">
+        <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`block w-full px-4 py-3 rounded-lg transition-all duration-200 ${
+                  className={`block w-full px-3 py-2.5 rounded-lg transition-all duration-200 ${
                     isActive(item.path)
                       ? 'bg-primary text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -108,10 +95,10 @@ export function Sidebar() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Icon className={`h-5 w-5 ${
+                      <Icon className={`h-4 w-4 ${
                         isActive(item.path) ? 'text-white' : 'text-gray-600'
                       }`} />
-                      <span className="font-medium">{item.label}</span>
+                      <span className="font-medium text-sm">{item.label}</span>
                     </div>
                     {item.count !== undefined && item.count > 0 && (
                       <span className={`px-2 py-1 text-xs rounded-full font-semibold ${

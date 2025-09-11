@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  User, 
   Users,
   Clock, 
   CheckCircle, 
@@ -11,7 +10,6 @@ import {
   Building, 
   Bell, 
   BarChart3,
-  LogOut,
   Menu,
   X
 } from 'lucide-react';
@@ -24,9 +22,8 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const { currentUser, logout } = useAuth();
+  const { currentUser } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // State for counts
@@ -63,14 +60,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     refreshPendingCount();
   }, [location.pathname, currentUser]);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  // Logout handled in AppNavbar
 
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -89,13 +79,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AppNavbar showUserMenu={true} isAdminLayout={true} />
+      <AppNavbar showUserMenu={true} />
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed top-24 bottom-0 left-0 flex w-80 flex-col bg-white">
-          <div className="flex h-20 items-center justify-between px-6">
-            <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
+          <div className="flex items-center justify-end px-4 py-3 border-b border-gray-200">
             <button
               onClick={() => setSidebarOpen(false)}
               className="text-gray-400 hover:text-gray-600"
@@ -103,8 +92,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="px-4 py-6 overflow-y-auto">
-            <ul className="space-y-3">
+          <nav className="px-4 py-4 overflow-y-auto flex-1">
+            <ul className="space-y-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -112,7 +101,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     <Link
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`block w-full px-4 py-3 rounded-lg transition-all duration-200 ${
+                      className={`block w-full px-3 py-2.5 rounded-lg transition-all duration-200 ${
                         isActive(item.href)
                           ? 'bg-primary text-white shadow-md'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -120,10 +109,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <Icon className={`h-5 w-5 ${
+                          <Icon className={`h-4 w-4 ${
                             isActive(item.href) ? 'text-white' : 'text-gray-600'
                           }`} />
-                          <span className="font-medium">{item.name}</span>
+                          <span className="font-medium text-sm">{item.name}</span>
                         </div>
                         {item.count !== undefined && item.count > 0 && (
                           <span className={`px-2 py-1 text-xs font-bold rounded-full ${
@@ -146,19 +135,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:top-24 lg:bottom-0 lg:flex lg:w-80 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 overflow-y-auto">
-          <div className="flex h-20 items-center justify-between px-6">
-            <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
-          </div>
-          <nav className="px-4 py-6">
-            <ul className="space-y-3">
+        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 h-full">
+          <nav className="px-4 py-4 overflow-y-auto flex-1">
+            <ul className="space-y-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (
                   <li key={item.name}>
                     <Link
                       to={item.href}
-                      className={`block w-full px-4 py-3 rounded-lg transition-all duration-200 ${
+                      className={`block w-full px-3 py-2.5 rounded-lg transition-all duration-200 ${
                         isActive(item.href)
                           ? 'bg-primary text-white shadow-md'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -166,10 +152,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <Icon className={`h-5 w-5 ${
+                          <Icon className={`h-4 w-4 ${
                             isActive(item.href) ? 'text-white' : 'text-gray-600'
                           }`} />
-                          <span className="font-medium">{item.name}</span>
+                          <span className="font-medium text-sm">{item.name}</span>
                         </div>
                         {item.count !== undefined && item.count > 0 && (
                           <span className={`px-2 py-1 text-xs font-bold rounded-full ${

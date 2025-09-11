@@ -53,6 +53,8 @@ export interface Booking {
   approvedBy?: string;
   rejectedBy?: string;
   adminComments?: string;
+  rejectionReason?: string;
+  cancellationRejectionReason?: string;
 }
 
 export interface Notification {

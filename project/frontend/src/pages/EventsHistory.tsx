@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { History, Calendar, Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { History, Calendar, Clock, MapPin, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { FirestoreService } from '../services/firestoreService';
 import { Booking } from '../types';
@@ -86,62 +86,86 @@ export function EventsHistory() {
           <p className="text-gray-600 mt-2">Your past hall bookings and events</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Event
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Hall
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date & Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {eventsHistory.map((event) => (
-                  <tr key={event.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{event.purpose}</div>
-                        <div className="text-sm text-gray-500">{event.organizingDepartment}</div>
+        <div className="space-y-4">
+          {eventsHistory.map((event) => (
+            <div key={event.id} className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">{event.purpose}</h3>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      event.status === 'approved'
+                        ? 'bg-green-100 text-green-800'
+                        : event.status === 'rejected'
+                        ? 'bg-red-100 text-red-800'
+                        : event.status === 'cancelled'
+                        ? 'bg-gray-200 text-gray-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {event.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                      {(event.status === 'rejected' || event.status === 'cancelled') && <XCircle className="h-3 w-3 mr-1" />}
+                      {event.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                      {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">Hall: {event.hallName}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {event.hallName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>{event.dates.join(', ')}</div>
-                      <div className="text-gray-500">{event.timeFrom} - {event.timeTo}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        event.status === 'approved'
-                          ? 'bg-green-100 text-green-800'
-                          : event.status === 'rejected'
-                          ? 'bg-red-100 text-red-800'
-                          : event.status === 'cancelled'
-                          ? 'bg-gray-200 text-gray-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {event.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
-                        {(event.status === 'rejected' || event.status === 'cancelled') && <XCircle className="h-3 w-3 mr-1" />}
-                        {event.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                        {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">Date: {event.dates.join(', ')}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">Time: {event.timeFrom} - {event.timeTo}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Department:</span> {event.organizingDepartment}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Capacity:</span> {event.seatingCapacity} people
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Submitted:</span> {new Date(event.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Show rejection reason if booking is rejected */}
+                  {event.status === 'rejected' && event.rejectionReason && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="text-sm font-medium text-red-800 mb-1">Rejection Reason</h4>
+                          <p className="text-sm text-red-700">{event.rejectionReason}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show cancellation rejection reason if cancellation was rejected */}
+                  {(event as any).cancellationRejectionReason && (
+                    <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="text-sm font-medium text-orange-800 mb-1">Cancellation Rejection Reason</h4>
+                          <p className="text-sm text-orange-700">{(event as any).cancellationRejectionReason}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </DashboardLayout>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XCircle, User, Calendar, MapPin, Clock } from 'lucide-react';
+import { XCircle, User, Calendar, MapPin, Clock, AlertTriangle } from 'lucide-react';
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
@@ -101,6 +101,19 @@ export function RejectedEvents() {
                         {facility}
                       </span>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Show rejection reason if available */}
+              {booking.rejectionReason && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-medium text-red-800 mb-1">Rejection Reason</h4>
+                      <p className="text-sm text-red-700">{booking.rejectionReason}</p>
+                    </div>
                   </div>
                 </div>
               )}
