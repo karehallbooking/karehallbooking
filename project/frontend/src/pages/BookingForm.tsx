@@ -103,17 +103,17 @@ export function BookingForm() {
       const txt = await sigRes.text();
       throw new Error(txt || 'Failed to get upload signature');
     }
-    const { timestamp, signature, access_mode } = await sigRes.json();
+    const { timestamp, signature, access_mode, api_key, upload_url } = await sigRes.json();
 
     const form = new FormData();
     form.append('file', file);
-    form.append('api_key', API_KEY);
+    form.append('api_key', api_key || API_KEY);
     form.append('timestamp', String(timestamp));
     form.append('signature', signature);
     form.append('access_mode', access_mode);
     // resource_type is part of the endpoint path and must NOT be included in the signature
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`, {
+    const res = await fetch(upload_url || `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`, {
       method: 'POST',
       body: form,
     });

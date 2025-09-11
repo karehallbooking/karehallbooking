@@ -22,6 +22,16 @@ router.post('/signature', cors(), async (req, res) => {
       });
     }
 
+    // simple health probe when requested: { "health": true }
+    if (req.query.health === 'true') {
+      return res.json({
+        success: true,
+        message: 'Cloudinary configuration present',
+        cloud_name: cloudName,
+        api_key: apiKey
+      });
+    }
+
     const timestamp = Math.floor(Date.now() / 1000);
     const paramsToSign = `access_mode=public&timestamp=${timestamp}`;
     const signature = crypto
