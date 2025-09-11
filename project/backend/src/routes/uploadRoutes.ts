@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import { MongoClient, ObjectId, GridFSBucket } from 'mongodb';
+import { MongoClient, ObjectId, GridFSBucket, ServerApiVersion } from 'mongodb';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -74,8 +74,15 @@ let bucket: GridFSBucket | null = null;
 async function getBucket(): Promise<GridFSBucket> {
   if (bucket) return bucket;
   if (!client) {
-    client = new MongoClient(MONGODB_URI);
+    client = new MongoClient(MONGODB_URI, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: false,
+        deprecationErrors: true
+      }
+    });
     await client.connect();
+    try { await client.db('admin').command({ ping: 1 }); } catch { /* ignore */ }
   }
   const db = client.db(MONGODB_DB_NAME);
   bucket = new GridFSBucket(db, { bucketName: 'pdfs' });
@@ -104,7 +111,7 @@ router.post('/pdf', cors(), upload.single('file'), async (req: MulterRequest, re
     const b = await getBucket();
     const filename = req.file.originalname || 'document.pdf';
     const uploadStream = b.openUploadStream(filename, { contentType: 'application/pdf' });
-    uploadStream.end(req.file.buffer, 'utf8');
+    uploadStream.end(req.file.buffer);
     uploadStream.on('error', (err: Error) => {
       res.status(500).json({ success: false, message: err.message, error: 'UPLOAD_ERROR' });
     });
