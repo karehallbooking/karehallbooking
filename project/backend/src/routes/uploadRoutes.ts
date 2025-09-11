@@ -65,7 +65,7 @@ router.post('/signature', cors(), async (req, res) => {
 });
 
 // ===== MongoDB GridFS setup =====
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://karehallbooking:Karehallbooking%40198@karehallbooking.dq7ugl3.mongodb.net/?retryWrites=true&w=majority&appName=Karehallbooking';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://kotarisandeep198_db_user:e5upm3bxvSMcQGwr@sandeephallbooking.dk27kdn.mongodb.net/?retryWrites=true&w=majority&appName=SandeepHallbooking';
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'karehallbooking';
 
 let client: MongoClient | null = null;
@@ -135,10 +135,12 @@ router.post('/pdf', cors(), upload.single('file'), async (req: MulterRequest, re
     uploadStream.on('error', (err: Error) => {
       res.status(500).json({ success: false, message: err.message, error: 'UPLOAD_ERROR' });
     });
-    uploadStream.on('finish', (file: any) => {
-      const id = (file._id as ObjectId).toHexString();
-      const url = `/api/uploads/pdf/${id}`;
-      res.json({ success: true, fileId: id, url });
+    uploadStream.on('finish', () => {
+      const id = (uploadStream.id as ObjectId).toHexString();
+      const host = req.get('x-forwarded-host') || req.get('host');
+      const proto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0];
+      const absoluteUrl = host ? `${proto}://${host}/api/uploads/pdf/${id}` : `/api/uploads/pdf/${id}`;
+      res.json({ success: true, fileId: id, url: absoluteUrl });
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err?.message || 'Upload failed', error: 'UPLOAD_FAILED' });

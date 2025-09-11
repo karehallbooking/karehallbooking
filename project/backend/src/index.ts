@@ -31,6 +31,9 @@ import './config/firebase';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Behind a proxy (Render/Vercel/Heroku) we must trust proxy so rate-limit and IP work
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
