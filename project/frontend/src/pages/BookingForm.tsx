@@ -62,7 +62,7 @@ export function BookingForm() {
     message: string;
   }>({ checking: false, available: null, message: '' });
 
-  // Cloudinary PDF upload state
+  // PDF upload state
   const [uploading, setUploading] = useState<{ brochure: boolean; approval: boolean }>({ brochure: false, approval: false });
   const [brochureFileName, setBrochureFileName] = useState<string>('');
   const [approvalFileName, setApprovalFileName] = useState<string>('');
@@ -85,43 +85,23 @@ export function BookingForm() {
   };
   const timeOptions = generateTimeOptions();
 
-  // ===== Cloudinary PDF upload helpers =====
-  const CLOUD_NAME = 'dh3zpvsha';
-  const API_KEY = '863319817571157';
-
-  // (signature is now generated server-side)
-
-  async function uploadPdfToCloudinary(file: File): Promise<{ secure_url: string }> {
+  // ===== Backend PDF upload helpers (GridFS) =====
+  async function uploadPdfToBackend(file: File): Promise<{ url: string }> {
     if (file.type !== 'application/pdf') {
       throw new Error('Only PDF files are allowed');
     }
-    // Get a server-generated signature for access_mode=public raw uploads
-    const sigRes = await fetch('https://karehallbooking-g695.onrender.com/api/uploads/signature', {
-      method: 'POST'
-    });
-    if (!sigRes.ok) {
-      const txt = await sigRes.text();
-      throw new Error(txt || 'Failed to get upload signature');
-    }
-    const { timestamp, signature, access_mode, api_key, upload_url } = await sigRes.json();
-
     const form = new FormData();
     form.append('file', file);
-    form.append('api_key', api_key || API_KEY);
-    form.append('timestamp', String(timestamp));
-    form.append('signature', signature);
-    form.append('access_mode', access_mode);
-    // resource_type is part of the endpoint path and must NOT be included in the signature
-
-    const res = await fetch(upload_url || `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`, {
+    const res = await fetch(`https://karehallbooking-g695.onrender.com/api/uploads/pdf`, {
       method: 'POST',
       body: form,
     });
     if (!res.ok) {
       const t = await res.text();
-      throw new Error(t || 'Cloudinary upload failed');
+      throw new Error(t || 'Upload failed');
     }
-    return res.json();
+    const data = await res.json();
+    return { url: data.url };
   }
 
   const onBrochureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,8 +110,8 @@ export function BookingForm() {
     try {
       setUploading((p) => ({ ...p, brochure: true }));
       setBrochureFileName(file.name);
-      const { secure_url } = await uploadPdfToCloudinary(file);
-      setEventBrochureLink(secure_url);
+      const { url } = await uploadPdfToBackend(file);
+      setEventBrochureLink(url);
       showSuccess('Uploaded', 'Event brochure uploaded successfully');
     } catch (err: any) {
       showError('Upload Failed', err?.message || 'Failed to upload brochure');
@@ -149,8 +129,8 @@ export function BookingForm() {
     try {
       setUploading((p) => ({ ...p, approval: true }));
       setApprovalFileName(file.name);
-      const { secure_url } = await uploadPdfToCloudinary(file);
-      setApprovalLetterLink(secure_url);
+      const { url } = await uploadPdfToBackend(file);
+      setApprovalLetterLink(url);
       showSuccess('Uploaded', 'Approval letter uploaded successfully');
     } catch (err: any) {
       showError('Upload Failed', err?.message || 'Failed to upload approval letter');

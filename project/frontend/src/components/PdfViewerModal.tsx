@@ -20,9 +20,12 @@ export const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose,
       setLoading(true);
       setError('');
       try {
-        const res = await fetch(url, { mode: 'cors' });
+        // Try proxy first to bypass hotlink/CORS on Cloudinary
+        const encoded = encodeURIComponent(url);
+        const proxyUrl = `https://karehallbooking-g695.onrender.com/api/uploads/proxy?url=${encoded}`;
+        const res = await fetch(proxyUrl);
         if (!res.ok) {
-          // Fallback: load URL directly in iframe (works even when fetch is unauthorized due to CORS)
+          // Fallback: load direct URL
           setBlobUrl(url);
           return;
         }
