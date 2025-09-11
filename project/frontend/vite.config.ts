@@ -11,6 +11,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Use browser build of exceljs
+      'exceljs': 'exceljs/dist/exceljs.min.js',
     },
   },
   server: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, User, Calendar, MapPin, Clock } from 'lucide-react';
+import { CheckCircle, User, Calendar, MapPin, Clock, Mail, Phone } from 'lucide-react';
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
@@ -68,6 +68,18 @@ export function ApprovedEvents() {
                   <User className="h-4 w-4 text-gray-400" />
                   <span className="text-sm text-gray-600">{booking.userName}</span>
                 </div>
+                {booking.userEmail && (
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{booking.userEmail}</span>
+                  </div>
+                )}
+                {(booking.userMobile || (booking as any).userContact) && (
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{booking.userMobile || (booking as any).userContact}</span>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-gray-400" />
                   <span className="text-sm text-gray-600">{booking.dates.join(', ')}</span>

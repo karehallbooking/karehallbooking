@@ -31,8 +31,8 @@ import './config/firebase';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Behind a proxy (Render/Vercel/Heroku) we must trust proxy so rate-limit and IP work
-app.set('trust proxy', true);
+// Behind a proxy (Render/Vercel/Heroku) trust a single hop so req.ip is correct without being permissive
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet({

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Calendar, Building, Users, Download } from 'lucide-react';
 import { FirestoreService } from '../../services/firestoreService';
-import { Booking, Hall } from '../../types';
+import { Booking, Hall, User } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 interface ReportData {
   totalBookings: number;
@@ -83,30 +85,248 @@ export function Reports() {
     }
   };
 
-  const exportReport = () => {
-    if (!reportData) return;
-    
-    const csvContent = [
-      ['Metric', 'Value'],
-      ['Total Bookings', reportData.totalBookings],
-      ['Pending Bookings', reportData.bookingsByStatus.pending],
-      ['Approved Bookings', reportData.bookingsByStatus.approved],
-      ['Rejected Bookings', reportData.bookingsByStatus.rejected],
-      ['', ''],
-      ['Hall', 'Bookings'],
-      ...Object.entries(reportData.bookingsByHall).map(([hall, count]) => [hall, count]),
-      ['', ''],
-      ['Department', 'Bookings'],
-      ...Object.entries(reportData.topDepartments).map(([dept, count]) => [dept, count])
-    ].map(row => row.join(',')).join('\n');
+  const exportReport = async () => {
+    try {
+      // Fetch full real data
+      const [bookings, users, halls] = await Promise.all([
+        FirestoreService.getAllBookings(),
+        FirestoreService.getAllUsers(),
+        FirestoreService.getHalls()
+      ]);
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `hall-booking-report-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+      // Derive sections
+      const todayISO = new Date().toISOString().split('T')[0];
+      const isFuture = (d: string) => d >= todayISO;
+      const upcoming: Booking[] = bookings.filter(b => (b.dates || []).some(isFuture));
+      const today = new Date();
+      const inTenDays = new Date();
+      inTenDays.setDate(today.getDate() + 10);
+      const isWithinNextTenDays = (d: string) => {
+        const dt = new Date(d);
+        dt.setHours(0,0,0,0);
+        const t0 = new Date(today);
+        t0.setHours(0,0,0,0);
+        const t1 = new Date(inTenDays);
+        t1.setHours(0,0,0,0);
+        return dt.getTime() >= t0.getTime() && dt.getTime() <= t1.getTime();
+      };
+      const approved: Booking[] = bookings.filter(b => b.status === 'approved');
+      const pending: Booking[] = bookings.filter(b => b.status === 'pending');
+      const rejected: Booking[] = bookings.filter(b => b.status === 'rejected');
+      const cancelled: Booking[] = bookings.filter(b =>
+        (b as any).status === 'cancelled' || (b as any).status === 'canceled' || (b as any).cancelled === true
+      );
+
+      // Monthly trends for last 12 months
+      const months: string[] = Array.from({ length: 12 }, (_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (11 - i));
+        return d.toISOString().slice(0, 7);
+      });
+      const monthlyCounts: number[] = months.map(m =>
+        bookings.filter(b => String(b.createdAt).slice(0, 7) === m).length
+      );
+
+      // Aggregations
+      const byHall: Record<string, number> = {};
+      halls.forEach(h => {
+        byHall[h.name] = bookings.filter(b => b.hallName === h.name).length;
+      });
+
+      const byDept: Record<string, number> = {};
+      bookings.forEach(b => {
+        const dept = b.department || b.userDepartment || 'Unknown';
+        byDept[dept] = (byDept[dept] || 0) + 1;
+      });
+
+      // Colors
+      const COLORS = {
+        headerBg: 'FFEEF2FF',
+        altRow: 'FFF7FAFF',
+        statusApproved: 'FF22C55E',
+        statusPending: 'FFEAB308',
+        statusRejected: 'FFEF4444',
+        statusCancelled: 'FF9CA3AF',
+        statusUpcoming: 'FF3B82F6'
+      } as const;
+
+      // Helpers
+      const autoFitColumns = (ws: ExcelJS.Worksheet) => {
+        ws.columns.forEach(col => {
+          let max = 10;
+          col.eachCell({ includeEmpty: true }, cell => {
+            const v = cell.value as any;
+            const len = v ? String(typeof v === 'object' ? (v.text || v.richText || v.hyperlink || '') : v).length : 0;
+            if (len > max) max = len;
+          });
+          col.width = Math.min(60, Math.max(12, max + 2));
+        });
+      };
+
+      const styleHeaderRow = (row: ExcelJS.Row) => {
+        row.font = { bold: true, color: { argb: 'FF111827' } };
+        row.alignment = { vertical: 'middle', horizontal: 'center' };
+        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.headerBg } } as any;
+        row.height = 22;
+      };
+
+      const stripeRows = (ws: ExcelJS.Worksheet, start: number) => {
+        for (let i = start; i <= ws.rowCount; i++) {
+          if (i % 2 === 0) {
+            ws.getRow(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.altRow } } as any;
+          }
+          ws.getRow(i).height = 18;
+        }
+      };
+
+      const wb = new ExcelJS.Workbook();
+      wb.creator = 'KARE Hall';
+      wb.created = new Date();
+
+      // Sheet 1: Overview
+      const s1 = wb.addWorksheet('Overview');
+      s1.columns = [
+        { header: 'Metric', key: 'metric', width: 30 },
+        { header: 'Value', key: 'value', width: 20 }
+      ];
+      styleHeaderRow(s1.getRow(1));
+
+      const s1Rows = [
+        ['Total Bookings', bookings.length],
+        ['Upcoming Bookings', upcoming.length],
+        ['Approved Bookings', approved.length],
+        ['Pending Bookings', pending.length],
+        ['Rejected Bookings', rejected.length],
+        ['Cancelled Bookings', cancelled.length]
+      ];
+      s1Rows.forEach(r => s1.addRow({ metric: r[0], value: r[1] }));
+      stripeRows(s1, 2);
+      autoFitColumns(s1);
+
+      // Upcoming bookings table (next 10 days)
+      s1.addRow([]);
+      const titleRow = s1.addRow(['Upcoming Bookings (Next 10 days)']);
+      titleRow.font = { bold: true, size: 12 };
+      s1.mergeCells(`A${titleRow.number}:B${titleRow.number}`);
+      const headersRow = s1.addRow(['Date','Booking ID','User Name','Department','Hall','From','To','Status']);
+      styleHeaderRow(headersRow);
+      const upcomingRows: Array<(string | number)>[] = [];
+      bookings.forEach(b => {
+        (b.dates || []).forEach(d => {
+          if (isWithinNextTenDays(d)) {
+            upcomingRows.push([
+              d,
+              b.bookingId || b.id || '',
+              b.userName,
+              b.department || b.userDepartment || '',
+              b.hallName,
+              b.timeFrom,
+              b.timeTo,
+              b.status
+            ]);
+          }
+        });
+      });
+      // Sort by date ascending
+      upcomingRows.sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+      upcomingRows.forEach(r => s1.addRow(r));
+      stripeRows(s1, headersRow.number + 1);
+
+      // Sheet 2: Bookings
+      const s2 = wb.addWorksheet('Bookings');
+      const bookingHeaders = [
+        'Booking ID','User ID','User Name','Department','Hall','Dates','Time From','Time To','Status','Created At','Updated At','Purpose','Email','Approved By','Rejected By'
+      ];
+      s2.addRow(bookingHeaders);
+      styleHeaderRow(s2.getRow(1));
+      bookings.forEach(b => {
+        s2.addRow([
+          b.bookingId || b.id,
+          b.userId,
+          b.userName,
+          b.department || b.userDepartment,
+          b.hallName,
+          (b.dates || []).join(', '),
+          b.timeFrom,
+          b.timeTo,
+          b.status,
+          typeof b.createdAt === 'string' ? b.createdAt : (b.createdAt?.toDate?.().toISOString?.() || ''),
+          typeof b.updatedAt === 'string' ? b.updatedAt : (b.updatedAt?.toDate?.().toISOString?.() || ''),
+          b.purpose,
+          b.userEmail || '',
+          b.approvedBy || '',
+          b.rejectedBy || ''
+        ]);
+      });
+      stripeRows(s2, 2);
+      autoFitColumns(s2);
+
+      // Sheet 3: Users
+      const s3 = wb.addWorksheet('Users');
+      const userHeaders = ['User ID','Name','Email','Department','Phone','Role','Designation','Cabin','Office Location','Created At'];
+      s3.addRow(userHeaders);
+      styleHeaderRow(s3.getRow(1));
+      (users as User[]).forEach(u => {
+        s3.addRow([
+          (u as any).id || u.uid,
+          u.name,
+          u.email,
+          u.department || '',
+          (u as any).mobile || '',
+          u.role,
+          u.designation || '',
+          u.cabinNumber || '',
+          u.officeLocation || '',
+          (u as any).createdAt || ''
+        ]);
+      });
+      stripeRows(s3, 2);
+      autoFitColumns(s3);
+
+      // Sheet 4: Monthly Tracking
+      const s4 = wb.addWorksheet('Monthly Tracking');
+      s4.addRow(['Month', 'Bookings']);
+      styleHeaderRow(s4.getRow(1));
+      months.forEach((m, idx) => s4.addRow([m, monthlyCounts[idx]]));
+      stripeRows(s4, 2);
+      autoFitColumns(s4);
+
+      // Sheet 5: Approved Events
+      const s5 = wb.addWorksheet('Approved Events');
+      const approvedHeaders = [
+        'Booking ID','User ID','User Name','Email','Department','Hall','Purpose','Event Dates','From','To','Created At','Updated At','Approved By'
+      ];
+      s5.addRow(approvedHeaders);
+      styleHeaderRow(s5.getRow(1));
+      approved.forEach(b => {
+        s5.addRow([
+          b.bookingId || b.id,
+          b.userId,
+          b.userName,
+          b.userEmail,
+          b.department || b.userDepartment,
+          b.hallName,
+          b.purpose,
+          (b.dates || []).join(', '),
+          b.timeFrom,
+          b.timeTo,
+          typeof b.createdAt === 'string' ? b.createdAt : (b.createdAt?.toDate?.().toISOString?.() || ''),
+          typeof b.updatedAt === 'string' ? b.updatedAt : (b.updatedAt?.toDate?.().toISOString?.() || ''),
+          b.approvedBy || ''
+        ]);
+      });
+      stripeRows(s5, 2);
+      autoFitColumns(s5);
+
+      // Download
+      const buf = await wb.xlsx.writeBuffer();
+      saveAs(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+        `hall-booking-report-${new Date().toISOString().split('T')[0]}.xlsx`
+      );
+    } catch (e) {
+      console.error('Error exporting Excel report:', e);
+      alert('Failed to export report. Please try again.');
+    }
   };
 
   if (loading) {
