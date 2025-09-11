@@ -13,6 +13,7 @@ import { startBookingWatcher } from './workers/bookingWatcher';
 import authRoutes from './routes/authRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import adminRoutes from './routes/adminRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 // Import Firebase config to initialize
 import './config/firebase';
@@ -120,6 +121,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

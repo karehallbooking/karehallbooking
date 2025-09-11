@@ -3,6 +3,7 @@ import { Clock, User, Calendar, MapPin, CheckCircle, XCircle } from 'lucide-reac
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
+import { PdfViewerModal } from '../../components/PdfViewerModal';
 import { RejectionModal } from '../../components/RejectionModal';
 import { useNotification } from '../../components/NotificationToast';
 
@@ -20,6 +21,7 @@ export function PendingRequests() {
     bookingTitle: ''
   });
   const { showSuccess, showError } = useNotification();
+  const [pdfModal, setPdfModal] = useState<{ open: boolean; url: string; title: string }>({ open: false, url: '', title: '' });
 
   useEffect(() => {
     loadPendingBookings();
@@ -202,6 +204,30 @@ export function PendingRequests() {
                     </div>
                   )}
 
+                  {/* PDF links */}
+                  {((booking as any).eventBrochureLink || (booking as any).approvalLetterLink) && (
+                    <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {(booking as any).eventBrochureLink && (
+                        <button
+                          type="button"
+                          onClick={() => setPdfModal({ open: true, url: (booking as any).eventBrochureLink, title: 'Event Brochure' })}
+                          className="inline-flex items-center justify-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg"
+                        >
+                          View Event Brochure (PDF)
+                        </button>
+                      )}
+                      {(booking as any).approvalLetterLink && (
+                        <button
+                          type="button"
+                          onClick={() => setPdfModal({ open: true, url: (booking as any).approvalLetterLink, title: 'Approval Letter' })}
+                          className="inline-flex items-center justify-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg"
+                        >
+                          View Approval Letter (PDF)
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   <div className="text-sm text-gray-500">
                     Submitted on {formatDate(booking.createdAt)}
                   </div>
@@ -245,6 +271,13 @@ export function PendingRequests() {
         onConfirm={handleRejectConfirm}
         bookingTitle={rejectionModal.bookingTitle}
         loading={processing === rejectionModal.bookingId}
+      />
+      {/* PDF modal viewer */}
+      <PdfViewerModal
+        isOpen={pdfModal.open}
+        onClose={() => setPdfModal({ open: false, url: '', title: '' })}
+        url={pdfModal.url}
+        title={pdfModal.title}
       />
     </AdminLayout>
   );

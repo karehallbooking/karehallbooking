@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { FirestoreService } from '../services/firestoreService';
 import { useNotification } from '../components/NotificationToast';
 import { User, Phone, Building, FileText, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { PdfViewerModal } from '../components/PdfViewerModal';
 
 export function BookingForm() {
   const { hallId } = useParams();
@@ -61,6 +62,14 @@ export function BookingForm() {
     message: string;
   }>({ checking: false, available: null, message: '' });
 
+  // Cloudinary PDF upload state
+  const [uploading, setUploading] = useState<{ brochure: boolean; approval: boolean }>({ brochure: false, approval: false });
+  const [brochureFileName, setBrochureFileName] = useState<string>('');
+  const [approvalFileName, setApprovalFileName] = useState<string>('');
+  const [eventBrochureLink, setEventBrochureLink] = useState<string>('');
+  const [approvalLetterLink, setApprovalLetterLink] = useState<string>('');
+  const [pdfModal, setPdfModal] = useState<{ open: boolean; url: string; title: string }>({ open: false, url: '', title: '' });
+
   // Facilities available for this specific hall (fetched from Firestore)
   const availableFacilities: string[] = Array.isArray(hall?.facilities)
     ? (hall.facilities as string[])
@@ -75,6 +84,83 @@ export function BookingForm() {
     return options;
   };
   const timeOptions = generateTimeOptions();
+
+  // ===== Cloudinary PDF upload helpers =====
+  const CLOUD_NAME = 'dh3zpvsha';
+  const API_KEY = '863319817571157';
+
+  // (signature is now generated server-side)
+
+  async function uploadPdfToCloudinary(file: File): Promise<{ secure_url: string }> {
+    if (file.type !== 'application/pdf') {
+      throw new Error('Only PDF files are allowed');
+    }
+    // Get a server-generated signature for access_mode=public raw uploads
+    const sigRes = await fetch('https://karehallbooking-g695.onrender.com/api/uploads/signature', {
+      method: 'POST'
+    });
+    if (!sigRes.ok) {
+      const txt = await sigRes.text();
+      throw new Error(txt || 'Failed to get upload signature');
+    }
+    const { timestamp, signature, access_mode } = await sigRes.json();
+
+    const form = new FormData();
+    form.append('file', file);
+    form.append('api_key', API_KEY);
+    form.append('timestamp', String(timestamp));
+    form.append('signature', signature);
+    form.append('access_mode', access_mode);
+    // resource_type is part of the endpoint path and must NOT be included in the signature
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`, {
+      method: 'POST',
+      body: form,
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(t || 'Cloudinary upload failed');
+    }
+    return res.json();
+  }
+
+  const onBrochureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploading((p) => ({ ...p, brochure: true }));
+      setBrochureFileName(file.name);
+      const { secure_url } = await uploadPdfToCloudinary(file);
+      setEventBrochureLink(secure_url);
+      showSuccess('Uploaded', 'Event brochure uploaded successfully');
+    } catch (err: any) {
+      showError('Upload Failed', err?.message || 'Failed to upload brochure');
+      setBrochureFileName('');
+      setEventBrochureLink('');
+    } finally {
+      setUploading((p) => ({ ...p, brochure: false }));
+      e.target.value = '';
+    }
+  };
+
+  const onApprovalChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploading((p) => ({ ...p, approval: true }));
+      setApprovalFileName(file.name);
+      const { secure_url } = await uploadPdfToCloudinary(file);
+      setApprovalLetterLink(secure_url);
+      showSuccess('Uploaded', 'Approval letter uploaded successfully');
+    } catch (err: any) {
+      showError('Upload Failed', err?.message || 'Failed to upload approval letter');
+      setApprovalFileName('');
+      setApprovalLetterLink('');
+    } finally {
+      setUploading((p) => ({ ...p, approval: false }));
+      e.target.value = '';
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -215,7 +301,10 @@ export function BookingForm() {
         numberOfDays: dates.length,
         status: 'pending' as const,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        // New PDF links
+        eventBrochureLink,
+        approvalLetterLink
       };
       await FirestoreService.createBooking(bookingData);
       setShowSuccessModal(true);
@@ -400,6 +489,59 @@ export function BookingForm() {
               </div>
             </div>
 
+            {/* PDF uploads row */}
+            <div className="mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Event Brochure */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Event Brochure (PDF)</label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={onBrochureChange}
+                    className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200"
+                  />
+                  {uploading.brochure && <p className="mt-2 text-sm text-gray-500">Uploading…</p>}
+                  {!!eventBrochureLink && (
+                    <p className="mt-2 text-sm text-green-700">
+                      <button
+                        type="button"
+                        onClick={() => setPdfModal({ open: true, url: eventBrochureLink, title: brochureFileName || 'Event Brochure' })}
+                        className="underline hover:text-green-800"
+                      >
+                        {brochureFileName}
+                      </button>
+                      <span className="ml-1">✅ Uploaded</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Approval Letter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Approval Letter (PDF)</label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={onApprovalChange}
+                    className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200"
+                  />
+                  {uploading.approval && <p className="mt-2 text-sm text-gray-500">Uploading…</p>}
+                  {!!approvalLetterLink && (
+                    <p className="mt-2 text-sm text-green-700">
+                      <button
+                        type="button"
+                        onClick={() => setPdfModal({ open: true, url: approvalLetterLink, title: approvalFileName || 'Approval Letter' })}
+                        className="underline hover:text-green-800"
+                      >
+                        {approvalFileName}
+                      </button>
+                      <span className="ml-1">✅ Uploaded</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-end space-x-4">
               <button type="button" onClick={() => navigate('/dashboard/book-hall')} className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
               <button type="submit" disabled={submitting || availabilityStatus.available === false} className={`px-6 py-3 rounded-lg transition-colors font-medium ${submitting || availabilityStatus.available === false ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-primary text-white hover:bg-primary-dark'}`}>{submitting ? 'Submitting...' : 'Submit Booking Request'}</button>
@@ -424,6 +566,14 @@ export function BookingForm() {
           </div>
         </div>
       )}
+
+      {/* PDF modal viewer */}
+      <PdfViewerModal
+        isOpen={pdfModal.open}
+        onClose={() => setPdfModal({ open: false, url: '', title: '' })}
+        url={pdfModal.url}
+        title={pdfModal.title}
+      />
     </DashboardLayout>
   );
 }
