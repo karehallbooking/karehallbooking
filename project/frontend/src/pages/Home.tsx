@@ -24,18 +24,23 @@ import {
   Sparkles,
   TrendingUp,
   Award,
-  Heart
+  Heart,
+  Building
 } from 'lucide-react';
 import { AppNavbar } from '../components/AppNavbar';
+import { FirestoreService } from '../services/firestoreService';
+import { Hall } from '../types';
 
 export function Home() {
   const [typingText, setTypingText] = useState('');
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [halls, setHalls] = useState<Hall[]>([]);
+  const [loading, setLoading] = useState(true);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
   const subtitleTexts = [
-    "Simple • Fast • Transparent",
+    "Simple • Fast • Easy Booking",
     "Book • Manage • Enjoy",
     "Easy • Reliable • Secure"
   ];
@@ -60,57 +65,24 @@ export function Home() {
     return () => clearInterval(typingInterval);
   }, [currentTextIndex]);
 
-  // Sample halls data
-  const halls = [
-    {
-      id: 1,
-      name: "K. S. Krishnan Auditorium",
-      capacity: 500,
-      image: "https://kalasalingam.ac.in/wp-content/uploads/2021/05/IMG_1827-scaled.jpg",
-      facilities: ["AC", "Stage", "Audio", "Projector", "Microphones"],
-      popular: true
-    },
-    {
-      id: 2,
-      name: "Dr. S. Radha Krishnan Senate Hall",
-      capacity: 200,
-      image: "https://thenews21.com/wp-content/uploads/2023/02/WhatsApp-Image-2023-02-26-at-8.23.14-PM-1-1024x682.jpeg",
-      facilities: ["AC", "Stage", "Audio", "Conference Table"],
-      popular: false
-    },
-    {
-      id: 3,
-      name: "Dr. A. P. J. Abdul Kalam Block Seminar Hall",
-      capacity: 150,
-      image: "https://i.ytimg.com/vi/mp9FMt4WnqI/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHUBoAC4AOKAgwIABABGFMgQyh_MA8=&rs=AOn4CLCTbpdeDXSQi7jV0KFO1U2MF2SNNw",
-      facilities: ["AC", "Stage", "Audio", "Whiteboard"],
-      popular: true
-    },
-    {
-      id: 4,
-      name: "Admin Block Seminar Hall",
-      capacity: 80,
-      image: "https://th-i.thgim.com/public/incoming/xgoon1/article68068023.ece/alternates/FREE_1200/16April_Campus_Kalasa.jpg",
-      facilities: ["AC", "Projector", "Whiteboard"],
-      popular: false
-    },
-    {
-      id: 5,
-      name: "Srinivasa Ramanujam Block Seminar Hall",
-      capacity: 120,
-      image: "https://app.afternoonnews.in/storage/images/5/1Ff6G694j4thp0GWuXwp6i58oob3fpPIdVlJd3OF.jpg",
-      facilities: ["AC", "Audio", "Projector", "Whiteboard", "Microphones"],
-      popular: true
-    },
-    {
-      id: 6,
-      name: "Dr. V. Vasudevan Seminar Hall",
-      capacity: 200,
-      image: "https://th-i.thgim.com/public/incoming/8jwn1a/article68094565.ece/alternates/FREE_1200/23April_Campus_Kalasa.jpg",
-      facilities: ["AC", "Projector", "Whiteboard", "Audio"],
-      popular: false
+  useEffect(() => {
+    loadHalls();
+  }, []);
+
+  const loadHalls = async () => {
+    try {
+      setLoading(true);
+      const hallsData = await FirestoreService.getHalls();
+      setHalls(hallsData);
+    } catch (error) {
+      console.error('Error loading halls:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Get popular halls (first 3 for display)
+  const popularHalls = halls.slice(0, 3);
 
   // Sample testimonials
   const testimonials = [
@@ -295,59 +267,89 @@ export function Home() {
             variants={staggerContainer}
             initial="initial"
             animate="animate"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
           >
-            {halls.map((hall, index) => (
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+                  <div className="h-5 bg-gray-300 rounded mb-3"></div>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </div>
+                  <div className="mb-4">
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="h-6 bg-gray-200 rounded w-16"></div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    </div>
+                    <div className="h-8 bg-gray-300 rounded w-20"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              halls.map((hall, index) => (
               <motion.div
                 key={hall.id}
                 variants={fadeInUp}
-                className="group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
+                className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-300"
               >
-                {hall.popular && (
-                  <motion.div
-                    className="absolute top-4 right-4 z-10"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                      Popular
-                    </span>
-                  </motion.div>
-                )}
+                <h3 className="text-lg font-bold text-gray-900 mb-3">{hall.name}</h3>
                 
-                <div className="relative overflow-hidden">
-                  <img
-                    src={hall.image}
-                    alt={hall.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>{hall.capacity} seats</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Building className="h-4 w-4" />
+                    <span>{hall.facilities?.length || 0} facilities</span>
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{hall.name}</h3>
-                  <p className="text-gray-600 mb-4">{hall.capacity} seats</p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {hall.facilities.map((facility, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                      >
-                        {facility}
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Available Facilities:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {hall.facilities && hall.facilities.length > 0 ? (
+                      hall.facilities.map((facility, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md"
+                        >
+                          {facility}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-md">
+                        No facilities listed
                       </span>
-                    ))}
+                    )}
                   </div>
+                </div>
 
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Available</span>
+                  </div>
                   <Link
                     to="/login"
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 text-center block"
+                    className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
                   >
                     Check Availability
                   </Link>
                 </div>
               </motion.div>
-            ))}
+              ))
+            )}
           </motion.div>
         </div>
       </section>

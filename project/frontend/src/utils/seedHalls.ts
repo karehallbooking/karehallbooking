@@ -38,7 +38,7 @@ const sampleHalls = [
     name: 'Dr. A. P. J. Abdul Kalam Block Seminar Hall',
     capacity: 150,
     facilities: ['Audio System', 'Projector', 'Air Conditioning', 'Stage', 'Whiteboard', 'Microphones'],
-    image: 'https://i.ytimg.com/vi/mp9FMt4WnqI/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHUBoAC4AOKAgwIABABGFMgQyh_MA8=&rs=AOn4CLCTbpdeDXSQi7jV0KFO1U2MF2SNNw',
+    image: 'https://kalasalingam.ac.in/wp-content/uploads/2023/08/IMG_7759-scaled.jpg',
     available: true
   },
   {
