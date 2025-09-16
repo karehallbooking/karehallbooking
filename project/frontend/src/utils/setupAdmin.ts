@@ -19,10 +19,10 @@ export async function setupAdminUser(): Promise<void> {
     // Create admin user document in Firestore
     const adminUser: User = {
       uid: firebaseUser.uid,
-      name: 'Admin User',
+      name: 'KARE Hall Admin',
       email: adminEmail,
       mobile: '',
-      department: '',
+      department: 'Administration',
       role: 'admin'
     };
     
@@ -47,10 +47,10 @@ export async function setupAdminUser(): Promise<void> {
           // Create user document if it doesn't exist
           const adminUser: User = {
             uid: firebaseUser.uid,
-            name: 'Admin User',
+            name: 'KARE Hall Admin',
             email: adminEmail,
             mobile: '',
-            department: '',
+            department: 'Administration',
             role: 'admin'
           };
           

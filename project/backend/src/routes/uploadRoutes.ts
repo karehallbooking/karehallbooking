@@ -100,8 +100,21 @@ router.get('/pdf/:id', cors(), async (req: express.Request, res: express.Respons
       return;
     }
     const b = await getBucket();
+    
+    // Set optimized headers for PDF serving
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=3600, immutable'); // Cache for 1 hour
+    res.setHeader('ETag', `"${id}"`); // Use ObjectId as ETag
+    res.setHeader('Last-Modified', new Date().toUTCString());
+    
+    // Handle conditional requests
+    const ifNoneMatch = req.headers['if-none-match'];
+    if (ifNoneMatch === `"${id}"`) {
+      res.status(304).end();
+      return;
+    }
+    
     const downloadStream = b.openDownloadStream(new ObjectId(id));
     downloadStream.on('error', () => res.status(404).end());
     downloadStream.pipe(res);
@@ -155,7 +168,9 @@ router.get('/proxy', cors(), async (req: express.Request, res: express.Response)
     const contentType = upstream.headers.get('content-type') || 'application/pdf';
     const buffer = Buffer.from(await upstream.arrayBuffer());
     res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('Cache-Control', 'public, max-age=3600, immutable'); // Cache for 1 hour
+    res.setHeader('ETag', `"${Buffer.from(target).toString('base64')}"`); // Use URL as ETag
+    res.setHeader('Last-Modified', new Date().toUTCString());
     // Ensure no frame restrictions are inherited on proxied binary responses
     res.removeHeader('X-Frame-Options');
     res.setHeader('Content-Security-Policy', "frame-ancestors 'self' https://*.vercel.app http://localhost:5173");

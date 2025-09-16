@@ -3,7 +3,7 @@ import { Clock, User, Calendar, MapPin, CheckCircle, XCircle } from 'lucide-reac
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
-import { PdfViewerModal } from '../../components/PdfViewerModal';
+import { PdfViewerModal, preloadPdf } from '../../components/PdfViewerModal';
 import { RejectionModal } from '../../components/RejectionModal';
 import { useNotification } from '../../components/NotificationToast';
 
@@ -26,6 +26,20 @@ export function PendingRequests() {
   useEffect(() => {
     loadPendingBookings();
   }, []);
+
+  // Preload PDFs when bookings are loaded
+  useEffect(() => {
+    if (bookings.length > 0) {
+      // Preload PDFs for all bookings that have approval letters
+      bookings.forEach(booking => {
+        if (booking.approvalLetter) {
+          preloadPdf(booking.approvalLetter).catch(error => {
+            console.warn('Failed to preload PDF for booking:', booking.id, error);
+          });
+        }
+      });
+    }
+  }, [bookings]);
 
   const loadPendingBookings = async () => {
     try {

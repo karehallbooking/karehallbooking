@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db, collections } from '../config/firebase';
 import { User } from '../types';
 
@@ -36,6 +36,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [firebaseToken, setFirebaseToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Helper function to find existing user document by email
+  const findUserByEmail = async (email: string): Promise<User | null> => {
+    try {
+      // Query Firestore for user with this email
+      const usersRef = collection(db, collections.users);
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        return { ...userDoc.data(), uid: userDoc.id } as User;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error finding user by email:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
@@ -119,23 +138,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
       
-      // Get user data from Firestore
-      const userDoc = await getDoc(doc(db, collections.users, firebaseUser.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data() as User;
-        const user: User = {
-          ...userData,
-          uid: firebaseUser.uid
-        };
+      // Check if there's an existing user document with this email (from any auth method)
+      const existingUser = await findUserByEmail(email);
+      
+      if (existingUser) {
+        console.log('🔍 Found existing user by email:', existingUser);
         
-        // Update last login
-        await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+        // Update the existing user document with the new UID if different
+        if (existingUser.uid !== firebaseUser.uid) {
+          console.log('🔄 UID mismatch, updating existing user document with new UID');
+          await updateDoc(doc(db, collections.users, existingUser.uid), {
+            uid: firebaseUser.uid,
+            lastLogin: new Date()
+          });
+          // Delete the old document
+          await deleteDoc(doc(db, collections.users, existingUser.uid));
+        } else {
+          // Just update last login
+          await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+            lastLogin: new Date()
+          });
+        }
+        
+        // Force admin role for admin email
+        if (firebaseUser.email === 'karehallbooking@gmail.com' && existingUser.role !== 'admin') {
+          console.log('🔧 Forcing admin role for admin email in login function');
+          await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+            role: 'admin',
+            name: 'KARE Hall Admin',
+            department: 'Administration'
+          });
+          existingUser.role = 'admin';
+          existingUser.name = 'KARE Hall Admin';
+          existingUser.department = 'Administration';
+          console.log('🔧 Admin role updated in login, user object:', existingUser);
+        }
+        
+        return { ...existingUser, uid: firebaseUser.uid };
+      } else {
+        // No existing user found, create new one
+        const isAdmin = firebaseUser.email === 'karehallbooking@gmail.com';
+        const newUser: User = {
+          uid: firebaseUser.uid,
+          name: isAdmin ? 'KARE Hall Admin' : (firebaseUser.displayName || 'User'),
+          email: firebaseUser.email || '',
+          mobile: '',
+          department: isAdmin ? 'Administration' : '',
+          role: isAdmin ? 'admin' : 'user'
+        };
+        console.log('🔍 Creating new user in login function:', newUser);
+        console.log('🔍 Is admin email?', isAdmin);
+        await setDoc(doc(db, collections.users, firebaseUser.uid), {
+          ...newUser,
+          createdAt: new Date(),
           lastLogin: new Date()
         });
-        
-        return user;
-      } else {
-        throw new Error('User profile not found. Please contact administrator.');
+        return newUser;
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -149,32 +207,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
       
-      // Check if user document exists
-      const userDoc = await getDoc(doc(db, collections.users, firebaseUser.uid));
+      // Check if there's an existing user document with this email (from any auth method)
+      const existingUser = await findUserByEmail(firebaseUser.email || '');
       
-      if (userDoc.exists()) {
-        // User exists, update last login
-        const userData = userDoc.data() as User;
-        const user: User = {
-          ...userData,
-          uid: firebaseUser.uid
-        };
+      if (existingUser) {
+        console.log('🔍 Found existing user by email for Google login:', existingUser);
         
-        await updateDoc(doc(db, collections.users, firebaseUser.uid), {
-          lastLogin: new Date()
-        });
+        // Update the existing user document with the new UID if different
+        if (existingUser.uid !== firebaseUser.uid) {
+          console.log('🔄 UID mismatch, updating existing user document with new UID for Google login');
+          await updateDoc(doc(db, collections.users, existingUser.uid), {
+            uid: firebaseUser.uid,
+            lastLogin: new Date()
+          });
+          // Delete the old document
+          await deleteDoc(doc(db, collections.users, existingUser.uid));
+        } else {
+          // Just update last login
+          await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+            lastLogin: new Date()
+          });
+        }
         
-        return user;
+        // Force admin role for admin email
+        if (firebaseUser.email === 'karehallbooking@gmail.com' && existingUser.role !== 'admin') {
+          console.log('🔧 Forcing admin role for admin email in Google login function');
+          await updateDoc(doc(db, collections.users, firebaseUser.uid), {
+            role: 'admin',
+            name: 'KARE Hall Admin',
+            department: 'Administration'
+          });
+          existingUser.role = 'admin';
+          existingUser.name = 'KARE Hall Admin';
+          existingUser.department = 'Administration';
+          console.log('🔧 Admin role updated in Google login, user object:', existingUser);
+        }
+        
+        return { ...existingUser, uid: firebaseUser.uid };
       } else {
-        // New user, create profile as regular user
+        // No existing user found, create new one
+        const isAdmin = firebaseUser.email === 'karehallbooking@gmail.com';
         const newUser: User = {
           uid: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User',
+          name: isAdmin ? 'KARE Hall Admin' : (firebaseUser.displayName || 'User'),
           email: firebaseUser.email || '',
           mobile: '',
           designation: 'Faculty',
-          department: '',
-          role: 'user'
+          department: isAdmin ? 'Administration' : '',
+          role: isAdmin ? 'admin' : 'user'
         };
         
         await setDoc(doc(db, collections.users, firebaseUser.uid), {
