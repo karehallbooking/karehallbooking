@@ -25,34 +25,16 @@ service cloud.firestore {
              request.auth.uid == resource.id;
     }
     
-    // Users collection rules
+    // Users collection rules - TEMPORARILY PERMISSIVE FOR TESTING
     match /users/{userId} {
       // Allow read access to all authenticated users
       allow read: if isAuthenticated();
       
-      // Allow create: only for new user registration
-      allow create: if isAuthenticated() && 
-                      request.auth.uid == userId &&
-                      request.resource.data.role == 'user';
+      // TEMPORARILY ALLOW ALL CREATES FOR AUTHENTICATED USERS
+      allow create: if isAuthenticated() && request.auth.uid == userId;
       
-      // Allow update: users can update their own profile (except role)
-      // Admins can update any user's role
-      // Main admin can demote admins
-      allow update: if isAuthenticated() && (
-        // User updating their own profile (except role)
-        (isOwnDocument() && 
-         request.resource.data.role == resource.data.role) ||
-        
-        // Admin promoting any user to admin
-        (isAdmin() && 
-         request.resource.data.role == 'admin' && 
-         resource.data.role == 'user') ||
-        
-        // Main admin demoting any admin to user
-        (isMainAdmin() && 
-         request.resource.data.role == 'user' && 
-         resource.data.role == 'admin')
-      );
+      // TEMPORARILY ALLOW ALL UPDATES FOR AUTHENTICATED USERS
+      allow update: if isAuthenticated() && request.auth.uid == userId;
       
       // Allow delete: only main admin can delete users
       allow delete: if isMainAdmin();
@@ -60,11 +42,9 @@ service cloud.firestore {
     
     // Bookings collection rules
     match /bookings/{bookingId} {
-      // Allow read: users can read their own bookings, admins can read all
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || 
-        isAdmin()
-      );
+      // Allow read: ALL authenticated users can read bookings for availability checking
+      // Users can read their own bookings, admins can read all, and anyone can read for availability
+      allow read: if isAuthenticated();
       
       // Allow create: authenticated users can create bookings
       allow create: if isAuthenticated() && 

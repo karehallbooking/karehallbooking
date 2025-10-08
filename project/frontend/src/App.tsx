@@ -30,6 +30,9 @@ import { HallManagement } from './pages/admin/HallManagement';
 import { Notifications as AdminNotifications } from './pages/admin/Notifications';
 import { Reports } from './pages/admin/Reports';
 import { CancelRequests } from './pages/admin/CancelRequests';
+import { CleanupDuplicates } from './pages/admin/CleanupDuplicates';
+import TestAccountLinking from './pages/TestAccountLinking';
+import DebugAccountLinking from './pages/DebugAccountLinking';
 
 function AppContent() {
   const { currentUser } = useAuth();
@@ -182,6 +185,13 @@ function AppContent() {
           <Reports />
         </ProtectedRoute>
       } />
+      <Route path="/admin/cleanup-duplicates" element={
+        <ProtectedRoute adminOnly>
+          <CleanupDuplicates />
+        </ProtectedRoute>
+      } />
+      <Route path="/test-account-linking" element={<TestAccountLinking />} />
+      <Route path="/debug-account-linking" element={<DebugAccountLinking />} />
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />

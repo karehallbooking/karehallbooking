@@ -132,8 +132,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </nav>
         </div>
       </div>
-
-      {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:top-24 lg:bottom-0 lg:flex lg:w-80 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 h-full">
           <nav className="px-4 py-4 overflow-y-auto flex-1">
@@ -175,8 +173,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </nav>
         </div>
       </div>
-
-      {/* Main content */}
       <div className="lg:pl-80 pt-24">
         {/* Mobile menu button */}
         <div className="lg:hidden fixed top-24 left-4 z-30">

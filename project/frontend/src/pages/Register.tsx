@@ -41,13 +41,15 @@ export function Register() {
     }
 
     try {
-      await register({
+      console.log('🚀 Starting registration process...');
+      const user = await register({
         name: formData.name,
         email: formData.email,
         mobile: formData.mobile,
         department: formData.department,
         password: formData.password
       });
+      console.log('✅ Registration successful:', user);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message);
@@ -61,7 +63,9 @@ export function Register() {
     setError('');
 
     try {
+      console.log('🚀 Starting Google login from register page...');
       const user = await loginWithGoogle();
+      console.log('✅ Google login successful:', user);
       navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
     } catch (err: any) {
       setError(err.message);

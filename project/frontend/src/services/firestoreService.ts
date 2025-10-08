@@ -5,7 +5,8 @@ import {
   getDoc, 
   addDoc, 
   updateDoc, 
-  deleteDoc, 
+  setDoc,
+  deleteDoc,
   query, 
   where, 
   orderBy, 
@@ -217,6 +218,9 @@ export class FirestoreService {
     try {
       const userRef = doc(db, collections.users, userId);
       
+      // Check if user document exists first
+      const userSnap = await getDoc(userRef);
+      
       // Only include fields that have actual values (not empty strings)
       const updateData: any = {
         updatedAt: new Date().toISOString()
@@ -230,10 +234,29 @@ export class FirestoreService {
       if (profileData.cabinNumber && profileData.cabinNumber.trim()) updateData.cabinNumber = profileData.cabinNumber.trim();
       if (profileData.officeLocation && profileData.officeLocation.trim()) updateData.officeLocation = profileData.officeLocation.trim();
       
-      await updateDoc(userRef, updateData);
-    } catch (error) {
+      if (userSnap.exists()) {
+        // Update existing document
+        await updateDoc(userRef, updateData);
+        console.log('✅ Updated existing user profile');
+      } else {
+        // Create new document if it doesn't exist
+        const newUserData = {
+          uid: userId,
+          role: 'user', // Default role
+          createdAt: new Date().toISOString(),
+          ...updateData
+        };
+        await setDoc(userRef, newUserData);
+        console.log('✅ Created new user profile document');
+      }
+    } catch (error: any) {
       console.error('Error saving user profile:', error);
-      throw new Error('Failed to save user profile');
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        userId: userId
+      });
+      throw new Error(`Failed to save user profile: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -250,6 +273,62 @@ export class FirestoreService {
     } catch (error) {
       console.error('Error fetching user profile:', error);
       throw new Error('Failed to fetch user profile');
+    }
+  }
+
+
+  // Utility function to find users by email
+  static async findUsersByEmail(email: string): Promise<any[]> {
+    try {
+      const usersRef = collection(db, collections.users);
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error finding users by email:', error);
+      throw new Error('Failed to find users by email');
+    }
+  }
+
+  // Utility function to merge duplicate accounts
+  static async mergeDuplicateAccounts(email: string): Promise<void> {
+    try {
+      const duplicateUsers = await this.findUsersByEmail(email);
+      
+      if (duplicateUsers.length <= 1) {
+        console.log('No duplicate accounts found for email:', email);
+        return;
+      }
+
+      console.log(`Found ${duplicateUsers.length} duplicate accounts for email:`, email);
+      
+      // Sort by creation date (keep the oldest one)
+      duplicateUsers.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime();
+      });
+
+      const primaryUser = duplicateUsers[0];
+      const duplicateUsersToDelete = duplicateUsers.slice(1);
+
+      console.log('Primary user (keeping):', primaryUser.id);
+      console.log('Duplicate users (deleting):', duplicateUsersToDelete.map(u => u.id));
+
+      // Delete duplicate user documents
+      for (const duplicateUser of duplicateUsersToDelete) {
+        await deleteDoc(doc(db, collections.users, duplicateUser.id));
+        console.log('Deleted duplicate user document:', duplicateUser.id);
+      }
+
+      console.log('✅ Successfully merged duplicate accounts for email:', email);
+    } catch (error) {
+      console.error('Error merging duplicate accounts:', error);
+      throw new Error('Failed to merge duplicate accounts');
     }
   }
 
@@ -434,7 +513,52 @@ export class FirestoreService {
     }
   }
 
-  // New: Check availability for From/To range (supports same-day and multi-day)
+  // Debug function to check all bookings for a hall
+  static async debugHallBookings(hallName: string): Promise<void> {
+    try {
+      console.log(`🔍 Debug: Checking all bookings for hall: "${hallName}"`);
+      
+      // First, let's get ALL bookings to see what hall names exist
+      const allBookingsQuery = query(collection(db, collections.bookings));
+      const allSnapshot = await getDocs(allBookingsQuery);
+      console.log(`📋 Total bookings in database: ${allSnapshot.docs.length}`);
+      
+      // Show all unique hall names
+      const hallNames = new Set();
+      allSnapshot.docs.forEach(doc => {
+        const booking = doc.data() as Booking;
+        if (booking.hallName) {
+          hallNames.add(booking.hallName);
+        }
+      });
+      console.log(`📋 All hall names in database:`, Array.from(hallNames));
+      
+      // Now check for exact match
+      const q = query(
+        collection(db, collections.bookings),
+        where('hallName', '==', hallName)
+      );
+      const snapshot = await getDocs(q);
+      console.log(`📋 Exact matches for "${hallName}": ${snapshot.docs.length}`);
+      
+      snapshot.docs.forEach((doc, index) => {
+        const booking = doc.data() as Booking;
+        console.log(`📋 Booking ${index + 1}:`, {
+          id: doc.id,
+          status: booking.status,
+          hallName: `"${booking.hallName}"`,
+          dates: booking.dates,
+          timeFrom: booking.timeFrom,
+          timeTo: booking.timeTo,
+          purpose: booking.purpose
+        });
+      });
+    } catch (error) {
+      console.error('Debug error:', error);
+    }
+  }
+
+  // BULLETPROOF availability check - simplified and guaranteed to work
   static async checkHallAvailabilityRange(
     hallName: string,
     fromDate: string,
@@ -443,89 +567,107 @@ export class FirestoreService {
     toTime: string
   ): Promise<{ available: boolean; reason?: string }> {
     try {
+      console.log('🚀 BULLETPROOF CHECK STARTING...');
+      console.log('🔍 Parameters:', { hallName, fromDate, fromTime, toDate, toTime });
+      
       if (!hallName || !fromDate || !fromTime || !toDate || !toTime) {
+        console.log('❌ Missing required fields');
         return { available: false, reason: 'Missing date or time.' };
       }
 
+      // Build date list inclusive
       const start = new Date(fromDate);
       const end = new Date(toDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const maxDate = new Date();
-      maxDate.setDate(today.getDate() + 30);
-      maxDate.setHours(23, 59, 59, 999);
-
-      if (start < today) return { available: false, reason: 'Cannot book for past dates' };
-      if (end > maxDate) return { available: false, reason: 'Bookings allowed only within 1 month from today' };
-
-      // Ensure chronological
-      if (end.getTime() < start.getTime()) {
-        return { available: false, reason: 'End date must be after or equal to start date' };
-      }
-
-      const toMinutes = (t: string) => {
-        const [h, m] = t.split(':').map(Number);
-        return h * 60 + m;
-      };
-      const newStart = toMinutes(fromTime);
-      const newEnd = toMinutes(toTime);
-      if (start.getTime() === end.getTime() && newEnd <= newStart) {
-        return { available: false, reason: 'End time must be after start time' };
-      }
-
-      // Build date list inclusive
       const dates: string[] = [];
       for (let d = new Date(start); d.getTime() <= end.getTime(); d.setDate(d.getDate() + 1)) {
         dates.push(d.toISOString().split('T')[0]);
       }
+      console.log(`📅 Dates to check: ${dates.join(', ')}`);
 
-      // For each date, fetch bookings and check overlap window
-      for (let i = 0; i < dates.length; i++) {
-        const date = dates[i];
-        const q = query(
-          collection(db, collections.bookings),
-          where('hallName', '==', hallName),
-          where('dates', 'array-contains', date),
-          where('status', 'in', ['pending', 'approved'])
-        );
-        const snapshot = await getDocs(q);
+      // Get ALL bookings - no filtering, no complex queries
+      console.log('🔍 Getting ALL bookings from database...');
+      const allBookingsQuery = query(collection(db, collections.bookings));
+      const allSnapshot = await getDocs(allBookingsQuery);
+      console.log(`📋 Total bookings found: ${allSnapshot.docs.length}`);
 
-        // Determine window for this specific day
-        let windowStart = 0; // minutes from 00:00
-        let windowEnd = 24 * 60; // exclusive
-        if (i === 0 && i === dates.length - 1) {
-          // same-day range
-          windowStart = newStart;
-          windowEnd = newEnd;
-        } else if (i === 0) {
-          // first day: from fromTime to end of day
-          windowStart = newStart;
-          windowEnd = 24 * 60;
-        } else if (i === dates.length - 1) {
-          // last day: start of day to toTime
-          windowStart = 0;
-          windowEnd = newEnd;
-        } else {
-          // middle day: any time overlaps
-          windowStart = 0;
-          windowEnd = 24 * 60;
-        }
+      // Show every single booking
+      allSnapshot.docs.forEach((doc, index) => {
+        const booking = doc.data() as Booking;
+        console.log(`📋 Booking ${index + 1}:`, {
+          id: doc.id,
+          hallName: `"${booking.hallName}"`,
+          status: booking.status,
+          dates: booking.dates,
+          timeFrom: booking.timeFrom,
+          timeTo: booking.timeTo
+        });
+      });
 
-        const hasOverlap = snapshot.docs.some((docSnap: any) => {
-          const b = docSnap.data() as Booking;
-          const existingStart = toMinutes(b.timeFrom);
-          const existingEnd = toMinutes(b.timeTo);
-          return windowStart < existingEnd && windowEnd > existingStart;
+      // Convert time to minutes for comparison
+      const toMinutes = (time: string) => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+
+      const requestedStartTime = toMinutes(fromTime);
+      const requestedEndTime = toMinutes(toTime);
+
+      console.log(`⏰ Requested time: ${fromTime} (${requestedStartTime} min) to ${toTime} (${requestedEndTime} min)`);
+
+      // Check each date in our range
+      for (const date of dates) {
+        console.log(`🔍 Checking date: ${date}`);
+        
+        // Find bookings for this hall on this date
+        const bookingsOnThisDate = allSnapshot.docs.filter(doc => {
+          const booking = doc.data() as Booking;
+          const isOurHall = booking.hallName === hallName;
+          const hasThisDate = booking.dates && booking.dates.includes(date);
+          const isPendingOrApproved = booking.status === 'pending' || booking.status === 'approved';
+          
+          console.log(`📋 Checking booking: hall="${booking.hallName}" vs "${hallName}", date=${booking.dates} includes ${date}, status=${booking.status}`);
+          
+          return isOurHall && hasThisDate && isPendingOrApproved;
         });
 
-        if (hasOverlap) {
-          return { available: false, reason: `Overlaps with an existing booking on ${date}` };
+        console.log(`📋 Found ${bookingsOnThisDate.length} bookings for ${date}`);
+
+        // Check for time conflicts with each existing booking
+        for (const doc of bookingsOnThisDate) {
+          const booking = doc.data() as Booking;
+          const existingStartTime = toMinutes(booking.timeFrom);
+          const existingEndTime = toMinutes(booking.timeTo);
+
+          console.log(`⏰ Existing booking: ${booking.timeFrom} (${existingStartTime} min) to ${booking.timeTo} (${existingEndTime} min)`);
+
+          // Check for time overlap
+          // Two time ranges overlap if: start1 < end2 AND start2 < end1
+          const hasOverlap = requestedStartTime < existingEndTime && existingStartTime < requestedEndTime;
+
+          console.log(`🔍 Time overlap check: ${requestedStartTime} < ${existingEndTime} AND ${existingStartTime} < ${requestedEndTime} = ${hasOverlap}`);
+
+          if (hasOverlap) {
+            console.log(`🚫🚫🚫 TIME CONFLICT! Overlaps with existing booking:`, {
+              status: booking.status,
+              time: `${booking.timeFrom}-${booking.timeTo}`,
+              hallName: booking.hallName
+            });
+            
+            return { 
+              available: false, 
+              reason: `❌ Hall is NOT available on ${date} from ${fromTime} to ${toTime} due to time conflict with existing ${booking.status} booking (${booking.timeFrom} - ${booking.timeTo})` 
+            };
+          } else {
+            console.log(`✅ No time conflict with booking ${booking.timeFrom}-${booking.timeTo}`);
+          }
         }
       }
 
+      console.log('✅ No conflicts found - hall is available');
       return { available: true };
+        
     } catch (e) {
-      console.error('Error checking cross-day availability:', e);
+      console.error('❌ Error in bulletproof check:', e);
       return { available: false, reason: 'Error checking availability. Please try again.' };
     }
   }

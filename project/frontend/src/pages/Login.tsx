@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { fetchSignInMethodsForEmail } from 'firebase/auth';
+import { auth } from '../config/firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, School, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { AppNavbar } from '../components/AppNavbar';
+import AccountLinkingModal from '../components/AccountLinkingModal';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -11,6 +14,15 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const [linkingModal, setLinkingModal] = useState<{
+    isOpen: boolean;
+    email: string;
+    existingMethod: 'password' | 'google';
+  }>({
+    isOpen: false,
+    email: '',
+    existingMethod: 'password'
+  });
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -21,9 +33,35 @@ export function Login() {
 
     try {
       const user = await login(email, password);
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      console.log('✅ Login successful, user:', user);
+      // Wait a bit for the auth state to update, then navigate
+      setTimeout(() => {
+        console.log('🔄 Navigating to dashboard based on user role:', user.role);
+        navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      }, 1000);
     } catch (err: any) {
-      setError(err.message);
+      try {
+        // Detect if this email is registered only with Google (no password yet)
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        const hasGoogle = methods.includes('google.com');
+        const hasPassword = methods.includes('password');
+
+        if (hasGoogle && !hasPassword) {
+          // Sign in with Google first, then open modal to link password to the same UID
+          try {
+            const user = await loginWithGoogle();
+            console.log('✅ Signed in with Google to prepare linking for email/password', user?.uid);
+            setLinkingModal({ isOpen: true, email, existingMethod: 'google' });
+          } catch (googleErr: any) {
+            setError(googleErr.message || 'Please sign in with Google first, then link your password.');
+          }
+          return;
+        }
+      } catch (_) {
+        // fall back to original error if fetchSignInMethodsForEmail fails
+      }
+
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -35,12 +73,49 @@ export function Login() {
 
     try {
       const user = await loginWithGoogle();
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      console.log('✅ Google login successful, user:', user);
+      // Wait a bit for the auth state to update, then navigate
+      setTimeout(() => {
+        console.log('🔄 Navigating to dashboard based on user role:', user.role);
+        navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      }, 1000);
     } catch (err: any) {
-      setError(err.message);
+      console.error('❌ Google login error:', err);
+      
+      // Check if this is an account linking error
+      if (err.message.includes('Account linking required!')) {
+        // Extract email from error message
+        const emailMatch = err.message.match(/email ([^\s]+)/);
+        const email = emailMatch ? emailMatch[1] : '';
+        
+        if (email) {
+          setLinkingModal({
+            isOpen: true,
+            email: email,
+            existingMethod: 'password'
+          });
+        } else {
+          setError(err.message);
+        }
+      } else if (err.message === 'ACCOUNT_EXISTS_WITH_PASSWORD') {
+        // Show account linking modal
+        setLinkingModal({
+          isOpen: true,
+          email: email || 'this email',
+          existingMethod: 'password'
+        });
+      } else {
+        setError(err.message);
+      }
     } finally {
       setGoogleLoading(false);
     }
+  };
+
+  const handleLinkingSuccess = () => {
+    setLinkingModal({ isOpen: false, email: '', existingMethod: 'password' });
+    // Reload the page to refresh the auth state
+    window.location.reload();
   };
 
   return (
@@ -170,6 +245,15 @@ export function Login() {
         </div>
         </div>
       </div>
+
+      {/* Account Linking Modal */}
+      <AccountLinkingModal
+        isOpen={linkingModal.isOpen}
+        onClose={() => setLinkingModal({ isOpen: false, email: '', existingMethod: 'password' })}
+        onSuccess={handleLinkingSuccess}
+        email={linkingModal.email}
+        existingMethod={linkingModal.existingMethod}
+      />
     </div>
   );
 }

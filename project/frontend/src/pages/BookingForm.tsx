@@ -56,6 +56,30 @@ export function BookingForm() {
     toTime: ''
   });
 
+  // Keep booking form in sync with the latest user profile.
+  // If the user updates their profile, fetch fresh data from Firestore and autofill.
+  React.useEffect(() => {
+    const syncUserProfileToForm = async () => {
+      try {
+        if (!currentUser?.uid) return;
+        const profile = await FirestoreService.getUserProfile(currentUser.uid);
+        if (profile) {
+          setFormData(prev => ({
+            ...prev,
+            applicantName: profile.name || prev.applicantName,
+            contactNumber: profile.mobile || prev.contactNumber,
+            department: profile.department || prev.department,
+            organizingDepartment: prev.organizingDepartment || profile.department || ''
+          }));
+        }
+      } catch (e) {
+        console.warn('Could not sync profile to booking form:', e);
+      }
+    };
+    syncUserProfileToForm();
+    // Re-run whenever the logged in user changes
+  }, [currentUser?.uid]);
+
   const [availabilityStatus, setAvailabilityStatus] = useState<{
     checking: boolean;
     available: boolean | null;
@@ -158,12 +182,40 @@ export function BookingForm() {
 
   const maybeCheckAvailability = async (next: typeof formData) => {
     const { fromDate, fromTime, toDate, toTime } = next;
+    
+    console.log('🔍 maybeCheckAvailability called with:', {
+      hall: hall?.name,
+      fromDate,
+      fromTime,
+      toDate,
+      toTime,
+      allFieldsPresent: !!(hall && fromDate && fromTime && toDate && toTime)
+    });
+    
     if (!hall || !fromDate || !fromTime || !toDate || !toTime) {
+      console.log('❌ Missing required fields, clearing availability status');
       setAvailabilityStatus({ checking: false, available: null, message: '' });
       return;
     }
+    
+    console.log('✅ All fields present, starting availability check...');
     setAvailabilityStatus(prev => ({ ...prev, checking: true }));
+    
+    try {
+      console.log('🔍 DEBUG: Starting availability check with:', {
+        hallName: hall.name,
+        fromDate,
+        fromTime,
+        toDate,
+        toTime
+      });
+      
+      // First, let's debug what bookings exist
+      await FirestoreService.debugHallBookings(hall.name);
+      
     const res = await FirestoreService.checkHallAvailabilityRange(hall.name, fromDate, fromTime, toDate, toTime);
+      console.log('🔍 DEBUG: Availability result:', res);
+      
     setAvailabilityStatus({
       checking: false,
       available: res.available,
@@ -171,10 +223,224 @@ export function BookingForm() {
         ? `✅ Available from ${fromDate} ${fromTime} to ${toDate} ${toTime}.`
         : `❌ Not available. ${res.reason || ''}`
     });
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      setAvailabilityStatus({
+        checking: false,
+        available: false,
+        message: '❌ Error checking availability. Please try again.'
+      });
+    }
   };
+
+  // Debug function to test availability manually
+  const testAvailability = async () => {
+    if (!hall) {
+      console.log('❌ No hall selected');
+      return;
+    }
+    
+    console.log('🧪 Testing availability manually...');
+    console.log('Hall:', hall.name);
+    console.log('Form data:', formData);
+    
+    try {
+      await FirestoreService.debugHallBookings(hall.name);
+      const result = await FirestoreService.checkHallAvailabilityRange(
+        hall.name, 
+        formData.fromDate, 
+        formData.fromTime, 
+        formData.toDate, 
+        formData.toTime
+      );
+      console.log('🧪 Test result:', result);
+    } catch (error) {
+      console.error('🧪 Test error:', error);
+    }
+  };
+
+  // Test the exact pending booking scenario
+  const testPendingBooking = async () => {
+    console.log('🧪 Testing pending booking scenario...');
+    try {
+      const result = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '09:00',
+        '2025-10-20',
+        '18:00'
+      );
+      console.log('🧪 Pending booking test result:', result);
+    } catch (error) {
+      console.error('🧪 Pending booking test error:', error);
+    }
+  };
+
+  // Test the exact scenario from the user's data
+  const testExactScenario = async () => {
+    console.log('🧪 Testing exact scenario from user data...');
+    console.log('Expected: Hall should be NOT available for 2025-10-20 09:00-18:00 due to pending booking');
+    
+    try {
+      // Test the exact same time (should be blocked)
+      const result1 = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '09:00',
+        '2025-10-20',
+        '18:00'
+      );
+      console.log('🧪 Same time test (should be blocked):', result1);
+      
+      // Test overlapping time (should be blocked)
+      const result2 = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '10:00',
+        '2025-10-20',
+        '17:00'
+      );
+      console.log('🧪 Overlapping time test (should be blocked):', result2);
+      
+      // Test different time (should be available)
+      const result3 = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-21',
+        '09:00',
+        '2025-10-21',
+        '18:00'
+      );
+      console.log('🧪 Different date test (should be available):', result3);
+      
+    } catch (error) {
+      console.error('🧪 Exact scenario test error:', error);
+    }
+  };
+
+  // Force test the exact scenario with the user's data
+  const forceTestExactScenario = async () => {
+    console.log('🧪 FORCE TESTING exact scenario...');
+    console.log('User data shows:');
+    console.log('- hallName: "K. S. Krishnan Auditorium"');
+    console.log('- dates: ["2025-10-20"]');
+    console.log('- timeFrom: "09:00"');
+    console.log('- timeTo: "18:00"');
+    console.log('- status: "pending"');
+    console.log('Expected: Should be BLOCKED');
+    
+    try {
+      // Then test availability
+      const result = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '09:00',
+        '2025-10-20',
+        '18:00'
+      );
+      
+      console.log('🧪 FORCE TEST RESULT:', result);
+      
+      if (result.available) {
+        console.error('❌ ERROR: Should be blocked but showing as available!');
+        console.error('❌ This means the availability check is not working properly!');
+      } else {
+        console.log('✅ SUCCESS: Correctly blocked');
+      }
+      
+    } catch (error) {
+      console.error('🧪 FORCE TEST ERROR:', error);
+    }
+  };
+
+  // Simple test that should definitely work
+  const simpleTest = async () => {
+    console.log('🧪 SIMPLE TEST - Testing with exact user data...');
+    
+    try {
+      const result = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '09:00',
+        '2025-10-20',
+        '18:00'
+      );
+      
+      console.log('🧪 SIMPLE TEST RESULT:', result);
+      
+      if (result.available) {
+        console.error('❌❌❌ CRITICAL ERROR: Hall should be BLOCKED but showing as AVAILABLE!');
+        console.error('❌ This means there is a fundamental issue with the availability check!');
+      } else {
+        console.log('✅✅✅ SUCCESS: Hall correctly blocked!');
+      }
+      
+    } catch (error) {
+      console.error('🧪 SIMPLE TEST ERROR:', error);
+    }
+  };
+
+  // Test multiple bookings per day scenario
+  const testMultipleBookingsPerDay = async () => {
+    console.log('🧪 TESTING MULTIPLE BOOKINGS PER DAY SCENARIO...');
+    console.log('Scenario: Morning booking 9AM-5PM, Evening booking 6PM-9PM');
+    
+    try {
+      // Test 1: Morning booking (should be blocked due to existing 9AM-6PM booking)
+      console.log('📅 Test 1: Morning booking 9AM-5PM (should be blocked)');
+      const morningResult = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '09:00',
+        '2025-10-20',
+        '17:00'
+      );
+      console.log('🧪 Morning booking result:', morningResult);
+      
+      // Test 2: Evening booking (should be available - no overlap with 9AM-6PM)
+      console.log('📅 Test 2: Evening booking 6PM-9PM (should be available)');
+      const eveningResult = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '18:00',
+        '2025-10-20',
+        '21:00'
+      );
+      console.log('🧪 Evening booking result:', eveningResult);
+      
+      // Test 3: Overlapping booking (should be blocked)
+      console.log('📅 Test 3: Overlapping booking 4PM-7PM (should be blocked)');
+      const overlapResult = await FirestoreService.checkHallAvailabilityRange(
+        'K. S. Krishnan Auditorium',
+        '2025-10-20',
+        '16:00',
+        '2025-10-20',
+        '19:00'
+      );
+      console.log('🧪 Overlapping booking result:', overlapResult);
+      
+      console.log('📊 SUMMARY:');
+      console.log(`Morning (9AM-5PM): ${morningResult.available ? 'AVAILABLE' : 'BLOCKED'} - ${morningResult.reason || 'No conflicts'}`);
+      console.log(`Evening (6PM-9PM): ${eveningResult.available ? 'AVAILABLE' : 'BLOCKED'} - ${eveningResult.reason || 'No conflicts'}`);
+      console.log(`Overlap (4PM-7PM): ${overlapResult.available ? 'AVAILABLE' : 'BLOCKED'} - ${overlapResult.reason || 'No conflicts'}`);
+      
+    } catch (error) {
+      console.error('🧪 Multiple bookings test error:', error);
+    }
+  };
+
+  // Make test functions available globally for debugging
+  React.useEffect(() => {
+    (window as any).testAvailability = testAvailability;
+    (window as any).testPendingBooking = testPendingBooking;
+    (window as any).testExactScenario = testExactScenario;
+    (window as any).forceTestExactScenario = forceTestExactScenario;
+    (window as any).simpleTest = simpleTest;
+    (window as any).testMultipleBookingsPerDay = testMultipleBookingsPerDay;
+  }, [hall, formData]);
 
   const onDateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log(`📅 Date changed: ${name} = ${value}`);
     const next = { ...formData, [name]: value } as typeof formData;
     setFormData(next);
     await maybeCheckAvailability(next);
@@ -182,6 +448,7 @@ export function BookingForm() {
 
   const onTimeChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
+    console.log(`⏰ Time changed: ${name} = ${value}`);
     const next = { ...formData, [name]: value } as typeof formData;
     setFormData(next);
     await maybeCheckAvailability(next);

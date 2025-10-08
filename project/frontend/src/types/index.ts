@@ -55,6 +55,9 @@ export interface Booking {
   adminComments?: string;
   rejectionReason?: string;
   cancellationRejectionReason?: string;
+  // PDF fields
+  eventBrochureLink?: string;
+  approvalLetterLink?: string;
 }
 
 export interface Notification {

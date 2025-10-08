@@ -30,11 +30,16 @@ export function PendingRequests() {
   // Preload PDFs when bookings are loaded
   useEffect(() => {
     if (bookings.length > 0) {
-      // Preload PDFs for all bookings that have approval letters
+      // Preload PDFs for all bookings that have PDF links
       bookings.forEach(booking => {
-        if (booking.approvalLetter) {
-          preloadPdf(booking.approvalLetter).catch(error => {
-            console.warn('Failed to preload PDF for booking:', booking.id, error);
+        if (booking.eventBrochureLink) {
+          preloadPdf(booking.eventBrochureLink).catch(error => {
+            console.warn('Failed to preload event brochure PDF for booking:', booking.id, error);
+          });
+        }
+        if (booking.approvalLetterLink) {
+          preloadPdf(booking.approvalLetterLink).catch(error => {
+            console.warn('Failed to preload approval letter PDF for booking:', booking.id, error);
           });
         }
       });
@@ -219,21 +224,27 @@ export function PendingRequests() {
                   )}
 
                   {/* PDF links */}
-                  {((booking as any).eventBrochureLink || (booking as any).approvalLetterLink) && (
+                  {(booking.eventBrochureLink || booking.approvalLetterLink) && (
                     <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {(booking as any).eventBrochureLink && (
+                      {booking.eventBrochureLink && (
                         <button
                           type="button"
-                          onClick={() => setPdfModal({ open: true, url: (booking as any).eventBrochureLink, title: 'Event Brochure' })}
+                          onClick={() => {
+                            console.log('Opening event brochure PDF:', booking.eventBrochureLink);
+                            setPdfModal({ open: true, url: booking.eventBrochureLink!, title: 'Event Brochure' });
+                          }}
                           className="inline-flex items-center justify-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg"
                         >
                           View Event Brochure (PDF)
                         </button>
                       )}
-                      {(booking as any).approvalLetterLink && (
+                      {booking.approvalLetterLink && (
                         <button
                           type="button"
-                          onClick={() => setPdfModal({ open: true, url: (booking as any).approvalLetterLink, title: 'Approval Letter' })}
+                          onClick={() => {
+                            console.log('Opening approval letter PDF:', booking.approvalLetterLink);
+                            setPdfModal({ open: true, url: booking.approvalLetterLink!, title: 'Approval Letter' });
+                          }}
                           className="inline-flex items-center justify-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg"
                         >
                           View Approval Letter (PDF)

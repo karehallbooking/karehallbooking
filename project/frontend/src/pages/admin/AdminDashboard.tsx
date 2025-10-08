@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Building, Bell, TrendingUp, Users } from 'lucide-react';
+import { Calendar, Clock, Building, Bell, TrendingUp, Users, Key } from 'lucide-react';
 import { FirestoreService } from '../../services/firestoreService';
 import { Booking, Hall, Notification } from '../../types';
 import { AdminLayout } from '../../components/AdminLayout';
+import AdminPasswordModal from '../../components/AdminPasswordModal';
+import { auth } from '../../config/firebase';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -16,9 +18,22 @@ export function AdminDashboard() {
   const [topHalls, setTopHalls] = useState<Array<{ hallName: string; count: number }>>([]);
   const [weekSchedule, setWeekSchedule] = useState<Record<string, Booking[]>>({});
   const [loading, setLoading] = useState(true);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [hasPasswordProvider, setHasPasswordProvider] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
+  }, []);
+
+  // Check if admin has password provider
+  useEffect(() => {
+    if (auth.currentUser) {
+      const providerData = auth.currentUser.providerData;
+      const hasPassword = providerData.some(provider => provider.providerId === 'password');
+      setHasPasswordProvider(hasPassword);
+      console.log('🔍 Admin providers:', providerData.map(p => p.providerId));
+      console.log('🔍 Admin has password provider:', hasPassword);
+    }
   }, []);
 
   const loadDashboardData = async () => {
@@ -125,8 +140,19 @@ export function AdminDashboard() {
       <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome, KARE Hall Admin</h1>
-        <p className="text-gray-600">Manage your hall bookings and events from your dashboard</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome, KARE Hall Admin</h1>
+            <p className="text-gray-600">Manage your hall bookings and events from your dashboard</p>
+          </div>
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Key className="h-4 w-4" />
+            <span>{hasPasswordProvider ? 'Update Password' : 'Add Password'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -300,6 +326,22 @@ export function AdminDashboard() {
         </div>
       </div>
       </div>
+
+      {/* Admin Password Modal */}
+      <AdminPasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onSuccess={() => {
+          console.log('✅ Admin password updated successfully!');
+          // Refresh the provider status
+          if (auth.currentUser) {
+            const providerData = auth.currentUser.providerData;
+            const hasPassword = providerData.some(provider => provider.providerId === 'password');
+            setHasPasswordProvider(hasPassword);
+            console.log('🔄 Updated admin provider status:', hasPassword);
+          }
+        }}
+      />
     </AdminLayout>
   );
 }
