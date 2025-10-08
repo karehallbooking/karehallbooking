@@ -252,7 +252,6 @@ export function Login() {
         onClose={() => setLinkingModal({ isOpen: false, email: '', existingMethod: 'password' })}
         onSuccess={handleLinkingSuccess}
         email={linkingModal.email}
-        existingMethod={linkingModal.existingMethod}
       />
     </div>
   );
