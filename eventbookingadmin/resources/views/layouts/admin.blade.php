@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Event Booking Admin' }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
             color-scheme: light;
@@ -357,6 +358,82 @@
 
         @yield('content')
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof flatpickr === 'undefined') {
+                return;
+            }
+
+            const isoToday = new Date().toISOString().split('T')[0];
+
+            function updateEndPicker(startInput) {
+                const selector = startInput.dataset.linkedEnd;
+                if (!selector) {
+                    return;
+                }
+                const endInput = document.querySelector(selector);
+                if (!endInput) {
+                    return;
+                }
+                const allowPastEnd = endInput.dataset.allowPast === 'true';
+                const minDate = startInput.value || (allowPastEnd ? null : isoToday);
+
+                if (endInput._flatpickr) {
+                    endInput._flatpickr.set('minDate', minDate || (allowPastEnd ? null : 'today'));
+                    if (minDate && endInput.value && endInput.value < minDate) {
+                        endInput._flatpickr.setDate(minDate, true);
+                    }
+                } else if (!allowPastEnd) {
+                    endInput.min = minDate || isoToday;
+                    if (minDate && endInput.value && endInput.value < minDate) {
+                        endInput.value = minDate;
+                    }
+                }
+            }
+
+            document.querySelectorAll('.date-picker').forEach(function (input) {
+                const allowPast = input.dataset.allowPast === 'true';
+                const defaultDate = input.value || (allowPast ? null : isoToday);
+
+                const config = {
+                    dateFormat: 'Y-m-d',
+                    allowInput: true,
+                    disableMobile: true,
+                    defaultDate: defaultDate,
+                    minDate: allowPast ? null : 'today',
+                    onChange: function (selectedDates, dateStr) {
+                        input.value = dateStr;
+                        if (input.dataset.linkedEnd) {
+                            updateEndPicker(input);
+                        }
+                    },
+                    onReady: function () {
+                        if (input.dataset.linkedStart) {
+                            const startInput = document.querySelector(input.dataset.linkedStart);
+                            if (startInput) {
+                                const sync = function () {
+                                    const minDate = startInput.value || (allowPast ? null : isoToday);
+                                    input._flatpickr.set('minDate', minDate || (allowPast ? null : 'today'));
+                                    if (minDate && input.value && input.value < minDate) {
+                                        input._flatpickr.setDate(minDate, true);
+                                    }
+                                };
+                                startInput.addEventListener('change', sync);
+                                sync();
+                            }
+                        }
+                    }
+                };
+
+                input._flatpickr = flatpickr(input, config);
+
+                if (input.dataset.linkedEnd) {
+                    updateEndPicker(input);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 

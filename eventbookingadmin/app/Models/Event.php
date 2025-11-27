@@ -9,9 +9,15 @@ class Event extends Model
     protected $fillable = [
         'organizer',
         'department',
+        'event_club',
+        'event_club_other',
         'title',
         'description',
         'venue',
+        'faculty_coordinator_name',
+        'faculty_coordinator_contact',
+        'student_coordinator_name',
+        'student_coordinator_contact',
         'start_date',
         'end_date',
         'start_time',
@@ -23,6 +29,9 @@ class Event extends Model
         'brochure_path',
         'attachment_path',
         'certificate_template_path',
+        'certificate_text_prefix',
+        'certificate_text_before_date',
+        'certificate_text_after_date',
         'status',
     ];
 

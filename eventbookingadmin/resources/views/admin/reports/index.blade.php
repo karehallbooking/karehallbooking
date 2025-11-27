@@ -53,11 +53,27 @@
         </label>
         <label style="flex:1 1 160px;">
             From date
-            <input type="date" name="from">
+            <input
+                type="text"
+                name="from"
+                id="report-from-date"
+                class="date-picker date-upcoming-only"
+                placeholder="dd-mm-yyyy"
+                data-linked-end="#report-to-date"
+                autocomplete="off"
+            >
         </label>
         <label style="flex:1 1 160px;">
             To date
-            <input type="date" name="to">
+            <input
+                type="text"
+                name="to"
+                id="report-to-date"
+                class="date-picker date-upcoming-only date-upcoming-end"
+                placeholder="dd-mm-yyyy"
+                data-linked-start="#report-from-date"
+                autocomplete="off"
+            >
         </label>
         <div style="align-self:flex-end;">
             <button type="submit">Export CSV</button>

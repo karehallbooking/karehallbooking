@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $upcomingEvents = Event::where('status', 'upcoming')
             ->where('start_date', '>=', now()->toDateString())
             ->count();
-        $totalRegistrations = Registration::count();
+        $totalRegistrations = Registration::where('payment_status', 'paid')->count();
         $todayAttendance = AttendanceLog::whereDate('scanned_at', today())->count();
         $recentRegistrations = Registration::with('event')
             ->orderBy('created_at', 'desc')

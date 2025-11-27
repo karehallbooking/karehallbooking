@@ -1,25 +1,15 @@
 @extends('layouts.admin')
 
 @section('content')
-@php($view = request('view'))
+@php
+    $view = request('view');
+    $timeOptions = collect(range(0, 23))->map(function ($hour) {
+        return str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
+    });
+    $todayDate = now()->format('Y-m-d');
+@endphp
 
-@if(!$view)
-    <div style="margin-bottom: 16px;">
-        <a class="back-to-dashboard" href="{{ route('admin.dashboard') }}">Back to Dashboard</a>
-    </div>
-    <div class="card-grid">
-        <div class="card">
-            <h3>Create New Event</h3>
-            <p>Launch a fresh event with full details.</p>
-            <a href="{{ route('admin.events.index', ['view' => 'create']) }}">Open Create Form</a>
-        </div>
-        <div class="card">
-            <h3>Available Events</h3>
-            <p>Browse, edit, or delete existing events.</p>
-            <a href="{{ route('admin.events.index', ['view' => 'list']) }}">View Events Table</a>
-        </div>
-    </div>
-@elseif($view === 'create')
+@if($view === 'create')
     <a class="back-link" href="{{ route('admin.events.index') }}">Back to Events</a>
     
     <style>
@@ -145,6 +135,49 @@
         .submit-btn:active {
             transform: translateY(0);
         }
+        .time-select-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .time-select {
+            width: 100%;
+            border: 2px solid #76a8ff;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0d2d5c;
+            background: linear-gradient(180deg, #fbfdff 0%, #eaf2ff 100%);
+            box-shadow: inset 0 1px 3px rgba(12, 69, 160, 0.15);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%232a5cd4' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 12px 8px;
+            height: 48px;
+            overflow: hidden;
+        }
+        .time-select-expanded {
+            height: auto;
+            min-height: 210px;
+            overflow-y: auto;
+            background-image: none;
+        }
+        .time-select:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+        .time-select option {
+            font-weight: 500;
+        }
+        .time-select-hint {
+            font-size: 12px;
+            color: #4a5d78;
+            margin-top: 4px;
+        }
     </style>
 
     <div class="section-block" style="padding: 20px; border: none; box-shadow: none;">
@@ -154,17 +187,32 @@
             
             <div class="form-section">
                 <h3>Event Details</h3>
-                <label>Event organized by (club)
-                    <input type="text" name="organizer" value="{{ old('organizer') }}" required placeholder="Enter organizer or club name">
+                <label>Event Club
+                    <select name="event_club" id="event_club" required onchange="toggleOtherClubInput()">
+                        <option value="">-- Select Club --</option>
+                        <option value="Technical Club" @selected(old('event_club') === 'Technical Club')>Technical Club</option>
+                        <option value="Cultural Club" @selected(old('event_club') === 'Cultural Club')>Cultural Club</option>
+                        <option value="Sports Club" @selected(old('event_club') === 'Sports Club')>Sports Club</option>
+                        <option value="Literary Club" @selected(old('event_club') === 'Literary Club')>Literary Club</option>
+                        <option value="Music Club" @selected(old('event_club') === 'Music Club')>Music Club</option>
+                        <option value="Dance Club" @selected(old('event_club') === 'Dance Club')>Dance Club</option>
+                        <option value="Photography Club" @selected(old('event_club') === 'Photography Club')>Photography Club</option>
+                        <option value="NSS Club" @selected(old('event_club') === 'NSS Club')>NSS Club</option>
+                        <option value="NCC Club" @selected(old('event_club') === 'NCC Club')>NCC Club</option>
+                        <option value="Robotics Club" @selected(old('event_club') === 'Robotics Club')>Robotics Club</option>
+                        <option value="Eco Club" @selected(old('event_club') === 'Eco Club')>Eco Club</option>
+                        <option value="Entrepreneurship Club" @selected(old('event_club') === 'Entrepreneurship Club')>Entrepreneurship Club</option>
+                        <option value="Other" @selected(old('event_club') === 'Other')>Other</option>
+                    </select>
                 </label>
-                <div class="two-col">
-                    <label>Event name
-                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="Enter event title">
-                    </label>
-                    <label>Department
-                        <input type="text" name="department" value="{{ old('department') }}" required placeholder="Enter department name">
+                <div id="other_club_wrapper" style="display: {{ old('event_club') === 'Other' ? 'block' : 'none' }};">
+                    <label>Other club name
+                        <input type="text" name="event_club_other" id="event_club_other" value="{{ old('event_club_other') }}" placeholder="Enter other club name">
                     </label>
                 </div>
+                <label>Event name
+                    <input type="text" name="title" value="{{ old('title') }}" required placeholder="Enter event title">
+                </label>
             </div>
 
             <div class="form-section">
@@ -172,21 +220,53 @@
                 <div class="two-col">
                     <label>
                         <span class="icon">📅</span>From date
-                        <input type="date" name="start_date" value="{{ old('start_date') }}" required>
+                        <input
+                            type="text"
+                            name="start_date"
+                            id="event-start-date"
+                            value="{{ old('start_date', $todayDate) }}"
+                            class="date-picker date-upcoming-only"
+                            placeholder="dd-mm-yyyy"
+                            data-linked-end="#event-end-date"
+                            autocomplete="off"
+                            required
+                        >
                     </label>
                     <label>
                         <span class="icon">📅</span>To date
-                        <input type="date" name="end_date" value="{{ old('end_date') }}" required>
+                        <input
+                            type="text"
+                            name="end_date"
+                            id="event-end-date"
+                            value="{{ old('end_date', $todayDate) }}"
+                            class="date-picker date-upcoming-only date-upcoming-end"
+                            placeholder="dd-mm-yyyy"
+                            data-linked-start="#event-start-date"
+                            autocomplete="off"
+                            required
+                        >
                     </label>
                 </div>
                 <div class="two-col">
-                    <label>
+                    <label class="time-select-group">
                         <span class="icon">🕐</span>From time (24-hour format)
-                        <input type="time" name="start_time" value="{{ old('start_time') }}" required>
+                        <select name="start_time" class="time-select" required>
+                            <option value="" disabled {{ old('start_time') ? '' : 'selected' }}>Select start time</option>
+                            @foreach($timeOptions as $time)
+                                <option value="{{ $time }}" @selected(old('start_time') === $time)>{{ $time }}</option>
+                            @endforeach
+                        </select>
+                        <span class="time-select-hint">Scroll to see all 24 hours</span>
                     </label>
-                    <label>
+                    <label class="time-select-group">
                         <span class="icon">🕐</span>To time (24-hour format)
-                        <input type="time" name="end_time" value="{{ old('end_time') }}" required>
+                        <select name="end_time" class="time-select" required>
+                            <option value="" disabled {{ old('end_time') ? '' : 'selected' }}>Select end time</option>
+                            @foreach($timeOptions as $time)
+                                <option value="{{ $time }}" @selected(old('end_time') === $time)>{{ $time }}</option>
+                            @endforeach
+                        </select>
+                        <span class="time-select-hint">View five slots at a time and scroll</span>
                     </label>
                 </div>
             </div>
@@ -226,21 +306,41 @@
             </div>
 
             <div class="form-section">
+                <h3>Coordinator Details</h3>
+                <div class="two-col">
+                    <label>Faculty Coordinator Name
+                        <input type="text" name="faculty_coordinator_name" value="{{ old('faculty_coordinator_name') }}" required placeholder="Enter faculty coordinator name">
+                    </label>
+                    <label>Faculty Coordinator Contact
+                        <input type="text" name="faculty_coordinator_contact" value="{{ old('faculty_coordinator_contact') }}" required placeholder="Enter contact number">
+                    </label>
+                </div>
+                <div class="two-col">
+                    <label>Student Coordinator Name
+                        <input type="text" name="student_coordinator_name" value="{{ old('student_coordinator_name') }}" required placeholder="Enter student coordinator name">
+                    </label>
+                    <label>Student Coordinator Contact
+                        <input type="text" name="student_coordinator_contact" value="{{ old('student_coordinator_contact') }}" required placeholder="Enter contact number">
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-section">
                 <h3>File Uploads</h3>
                 <div class="two-col">
                     <label>
-                        <span class="icon">📄</span>Event brochure PDF upload (Max 10MB)
+                        <span class="icon">📄</span>Event Approval Letter (PDF, Max 10MB)
                         <div class="file-upload-wrapper">
                             <input type="file" name="brochure_pdf" accept="application/pdf" id="brochure_pdf" onchange="checkFileSize(this, 10)">
                         </div>
-                        <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">Maximum file size: 10MB</small>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">Upload the event approval letter PDF (Maximum file size: 10MB).</small>
                     </label>
                     <label>
-                        <span class="icon">📎</span>Any other PDF upload (Max 10MB)
+                        <span class="icon">📎</span>Event Brochure (PDF, Max 10MB)
                         <div class="file-upload-wrapper">
                             <input type="file" name="attachment_pdf" accept="application/pdf" id="attachment_pdf" onchange="checkFileSize(this, 10)">
                         </div>
-                        <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">Maximum file size: 10MB</small>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">Upload the event brochure PDF (Maximum file size: 10MB).</small>
                     </label>
                 </div>
             </div>
@@ -258,6 +358,63 @@
                 });
             }
         })();
+        
+        function toggleOtherClubInput() {
+            var clubSelect = document.getElementById('event_club');
+            var otherWrapper = document.getElementById('other_club_wrapper');
+            var otherInput = document.getElementById('event_club_other');
+            
+            if (clubSelect && otherWrapper) {
+                if (clubSelect.value === 'Other') {
+                    otherWrapper.style.display = 'block';
+                    if (otherInput) {
+                        otherInput.setAttribute('required', 'required');
+                    }
+                } else {
+                    otherWrapper.style.display = 'none';
+                    if (otherInput) {
+                        otherInput.removeAttribute('required');
+                        otherInput.value = '';
+                    }
+                }
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleOtherClubInput();
+
+            const timeSelects = document.querySelectorAll('.time-select');
+            timeSelects.forEach(function(select) {
+                const expand = function() {
+                    select.classList.add('time-select-expanded');
+                    select.setAttribute('size', 7);
+                    select.size = 7;
+                    select.style.height = 'auto';
+                };
+                const collapse = function() {
+                    select.classList.remove('time-select-expanded');
+                    select.removeAttribute('size');
+                    select.size = 1;
+                    select.style.height = '48px';
+                };
+
+                select.addEventListener('focus', expand);
+                select.addEventListener('click', expand);
+                select.addEventListener('blur', collapse);
+                select.addEventListener('change', function() {
+                    collapse();
+                    setTimeout(function() {
+                        select.blur();
+                    }, 0);
+                });
+                select.addEventListener('mouseleave', function() {
+                    if (!select.matches(':focus')) {
+                        collapse();
+                    }
+                });
+            });
+        });
         
         function checkFileSize(input, maxSizeMB) {
             if (input.files && input.files[0]) {
@@ -300,7 +457,7 @@
                         </td>
                         <td>{{ $event->venue }}</td>
                         <td>{{ $event->capacity }}</td>
-                        <td>{{ $event->registrations_count }}</td>
+                        <td>{{ $event->registrations_count ?? $event->registrations()->where('payment_status', 'paid')->count() }}</td>
                         <td>{{ ucfirst($event->status) }}</td>
                         <td class="actions">
                             <a href="{{ route('admin.events.edit', $event->id) }}">Edit</a>
@@ -320,5 +477,25 @@
         </table>
         {{ $events->links('pagination::simple-default') }}
     </div>
+@else
+    @if(!$view)
+        <div style="margin-bottom: 16px;">
+            <a class="back-to-dashboard" href="{{ route('admin.dashboard') }}">Back to Dashboard</a>
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h3>Create New Event</h3>
+                <p>Launch a fresh event with full details.</p>
+                <a href="{{ route('admin.events.index', ['view' => 'create']) }}">Open Create Form</a>
+            </div>
+            <div class="card">
+                <h3>Available Events</h3>
+                <p>Browse, edit, or delete existing events.</p>
+                <a href="{{ route('admin.events.index', ['view' => 'list']) }}">View Events Table</a>
+            </div>
+        </div>
+    @else
+        <p>Invalid view selection.</p>
+    @endif
 @endif
 @endsection

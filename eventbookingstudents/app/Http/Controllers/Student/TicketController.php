@@ -13,12 +13,21 @@ class TicketController extends Controller
 {
     public function show($id, Request $request)
     {
-        $registration = Registration::with('event')->findOrFail($id);
+        $registration = Registration::with(['event', 'ticket'])->findOrFail($id);
         
         // Optional: Verify student email matches (for security)
         $studentEmail = $request->session()->get('student_email');
         if ($studentEmail && $registration->student_email !== $studentEmail) {
             abort(403, 'Unauthorized access to this ticket.');
+        }
+
+        // Only allow ticket viewing for paid registrations with tickets
+        if ($registration->payment_status !== 'paid') {
+            abort(403, 'Ticket is only available after payment is completed.');
+        }
+
+        if (!$registration->ticket) {
+            abort(404, 'Ticket not found. Please contact support if payment was completed.');
         }
 
         if (!$registration->qr_code) {

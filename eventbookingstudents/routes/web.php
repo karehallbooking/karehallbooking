@@ -51,7 +51,16 @@ Route::post('/student/events/{id}/register', [DashboardController::class, 'regis
 Route::get('/student/events/{id}/brochure', [DashboardController::class, 'downloadBrochure'])->name('student.events.brochure');
 Route::get('/student/events/{id}/attachment', [DashboardController::class, 'downloadAttachment'])->name('student.events.attachment');
 Route::get('/student/certificates/{id}/download', [DashboardController::class, 'downloadCertificate'])->name('student.certificates.download');
+Route::get('/student/certificates/{id}', [DashboardController::class, 'viewCertificate'])->name('student.certificates.view');
 
 // Ticket Viewing (Inline)
 Route::get('/student/registrations/{id}/ticket', [\App\Http\Controllers\Student\TicketController::class, 'show'])->name('student.ticket.show');
+
+// Razorpay Payment Routes
+Route::get('/events/{event}/register', [\App\Http\Controllers\EventRegistrationController::class, 'showRegisterPage'])->name('events.register');
+Route::post('/events/{event}/create-order', [\App\Http\Controllers\EventRegistrationController::class, 'createOrderForEvent'])->name('events.createOrder');
+Route::post('/payment/success', [\App\Http\Controllers\PaymentController::class, 'handlePaymentSuccess'])->name('payment.success.post');
+Route::get('/payment/success', [\App\Http\Controllers\PaymentController::class, 'successPage'])->name('payment.success');
+Route::get('/payment/failure', [\App\Http\Controllers\PaymentController::class, 'failurePage'])->name('payment.failure');
+Route::post('/webhooks/razorpay/payment', [\App\Http\Controllers\PaymentController::class, 'handleWebhook'])->name('razorpay.webhook')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
 

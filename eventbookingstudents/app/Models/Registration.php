@@ -27,6 +27,38 @@ class Registration extends Model
         'certificate_issued_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (Registration $registration) {
+            if ($registration->payment_status === 'paid' && $registration->event) {
+                $registration->event()->increment('registrations_count');
+            }
+        });
+
+        static::updated(function (Registration $registration) {
+            if ($registration->wasChanged('payment_status') && $registration->event) {
+                $original = $registration->getOriginal('payment_status');
+                $current = $registration->payment_status;
+
+                if ($original !== 'paid' && $current === 'paid') {
+                    $registration->event()->increment('registrations_count');
+                } elseif ($original === 'paid' && $current !== 'paid') {
+                    $registration->event()
+                        ->where('registrations_count', '>', 0)
+                        ->decrement('registrations_count');
+                }
+            }
+        });
+
+        static::deleted(function (Registration $registration) {
+            if ($registration->payment_status === 'paid' && $registration->event_id) {
+                $registration->event()
+                    ->where('registrations_count', '>', 0)
+                    ->decrement('registrations_count');
+            }
+        });
+    }
+
     public function event()
     {
         return $this->belongsTo(Event::class);
@@ -35,6 +67,16 @@ class Registration extends Model
     public function certificate()
     {
         return $this->hasOne(Certificate::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+    public function ticket()
+    {
+        return $this->hasOne(Ticket::class);
     }
 }
 

@@ -201,7 +201,8 @@
                         </div>
                         <div>
                             <?php if($registration->certificate_issued && $registration->certificate): ?>
-                                <a href="<?php echo e(route('student.certificates.download', $registration->certificate->id)); ?>" target="_blank" class="btn btn-link">Download Certificate</a>
+                                <a href="#" onclick="openPdfModal('<?php echo e(route('student.certificates.view', $registration->certificate->id)); ?>', 'Certificate - <?php echo e($registration->event->title); ?>'); return false;" class="btn btn-link">View Certificate</a>
+                                <a href="<?php echo e(route('student.certificates.download', $registration->certificate->id)); ?>" target="_blank" class="btn btn-link" style="margin-left: 8px;">Download</a>
                             <?php else: ?>
                                 <span style="color: #999; font-size: 13px;">Certificate not issued</span>
                             <?php endif; ?>
@@ -238,7 +239,8 @@
                             </span>
                         </div>
                         <div>
-                            <a href="<?php echo e(route('student.certificates.download', $certificate->id)); ?>" target="_blank" class="btn btn-link">Download Certificate</a>
+                            <a href="#" onclick="openPdfModal('<?php echo e(route('student.certificates.view', $certificate->id)); ?>', 'Certificate - <?php echo e($certificate->event->title); ?>'); return false;" class="btn btn-link">View Certificate</a>
+                            <a href="<?php echo e(route('student.certificates.download', $certificate->id)); ?>" target="_blank" class="btn btn-link" style="margin-left: 8px;">Download</a>
                         </div>
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

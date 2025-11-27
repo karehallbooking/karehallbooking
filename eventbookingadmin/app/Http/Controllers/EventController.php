@@ -22,11 +22,15 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'organizer' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
+            'event_club' => 'required|string|max:255',
+            'event_club_other' => 'required_if:event_club,Other|nullable|string|max:255',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'venue' => 'required|string|max:255',
+            'faculty_coordinator_name' => 'required|string|max:255',
+            'faculty_coordinator_contact' => 'required|string|max:20',
+            'student_coordinator_name' => 'required|string|max:255',
+            'student_coordinator_contact' => 'required|string|max:20',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'start_time' => 'required|date_format:H:i',
@@ -41,6 +45,8 @@ class EventController extends Controller
         $payload = collect($validated)->except(['pricing_type', 'brochure_pdf', 'attachment_pdf'])->toArray();
         $payload['is_paid'] = $validated['pricing_type'] === 'paid';
         $payload['amount'] = $payload['is_paid'] ? ($validated['amount'] ?? 0) : null;
+        // Set organizer field for backward compatibility (use event_club or event_club_other)
+        $payload['organizer'] = $validated['event_club'] === 'Other' ? ($validated['event_club_other'] ?? '') : $validated['event_club'];
         if (!isset($payload['status'])) {
             $payload['status'] = 'upcoming';
         }
@@ -113,11 +119,15 @@ class EventController extends Controller
     {
         $event = Event::findOrFail($id);
         $validated = $request->validate([
-            'organizer' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
+            'event_club' => 'required|string|max:255',
+            'event_club_other' => 'required_if:event_club,Other|nullable|string|max:255',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'venue' => 'required|string|max:255',
+            'faculty_coordinator_name' => 'required|string|max:255',
+            'faculty_coordinator_contact' => 'required|string|max:20',
+            'student_coordinator_name' => 'required|string|max:255',
+            'student_coordinator_contact' => 'required|string|max:20',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'start_time' => 'required|date_format:H:i',

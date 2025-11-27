@@ -48,7 +48,6 @@ class DashboardController extends Controller
         if (!$selectedSection || $selectedSection === 'available') {
             $availableEvents = Event::whereIn('status', ['published', 'upcoming'])
                 ->whereDate('end_date', '>=', now()->toDateString())
-                ->withCount('registrations')
                 ->orderBy('start_date', 'asc')
                 ->get()
                 ->map(function ($event) {
@@ -145,7 +144,7 @@ class DashboardController extends Controller
         try {
             DB::beginTransaction();
 
-            $event = Event::withCount('registrations')->findOrFail($id);
+            $event = Event::findOrFail($id);
 
             // Check if event is available (published or upcoming)
             if (!in_array($event->status, ['published', 'upcoming'])) {
@@ -172,13 +171,7 @@ class DashboardController extends Controller
                 return redirect()->back()->with('error', 'All seats are booked for this event.');
             }
 
-            // Generate QR code data
-            $qrData = [
-                'reg_id' => null, // Will be set after creation
-                'event_id' => $event->id,
-                'student_email' => $request->student_email,
-                'ts' => now()->timestamp,
-            ];
+            $qrCode = null;
 
             // Create registration
             $registration = Registration::create([
@@ -193,33 +186,42 @@ class DashboardController extends Controller
                 'certificate_issued' => false,
             ]);
 
-            // Update QR data with registration ID
-            $qrData['reg_id'] = $registration->id;
-            $qrPayload = base64_encode(json_encode($qrData));
-            
-            // Generate HMAC signature (using QR_SECRET from env - must match admin verification)
-            $secret = env('QR_SECRET', 'default-secret-key');
-            
-            // Remove base64: prefix if present (Laravel encrypted env format)
-            if (str_starts_with($secret, 'base64:')) {
-                $secret = base64_decode(substr($secret, 7));
-            }
-            
-            if (empty($secret) || $secret === 'default-secret-key') {
-                \Log::warning('QR_SECRET is not set or using default value. QR codes may not verify correctly.');
-            }
-            $signature = hash_hmac('sha256', $qrPayload, $secret);
-            $qrCode = $qrPayload . '.' . $signature;
+            // Only generate QR code for FREE events (paid events will get QR code after payment)
+            if (!$event->is_paid) {
+                // Generate QR code data
+                $qrData = [
+                    'reg_id' => $registration->id,
+                    'event_id' => $event->id,
+                    'student_email' => $request->student_email,
+                    'ts' => now()->timestamp,
+                ];
+                
+                $qrPayload = base64_encode(json_encode($qrData));
+                
+                // Generate HMAC signature (using QR_SECRET from env - must match admin verification)
+                $secret = env('QR_SECRET', 'default-secret-key');
+                
+                // Remove base64: prefix if present (Laravel encrypted env format)
+                if (str_starts_with($secret, 'base64:')) {
+                    $secret = base64_decode(substr($secret, 7));
+                }
+                
+                if (empty($secret) || $secret === 'default-secret-key') {
+                    \Log::warning('QR_SECRET is not set or using default value. QR codes may not verify correctly.');
+                }
+                $signature = hash_hmac('sha256', $qrPayload, $secret);
+                $qrCode = $qrPayload . '.' . $signature;
 
-            // Update registration with QR code
-            $registration->qr_code = $qrCode;
-            $registration->save();
+                // Update registration with QR code (only for free events)
+                $registration->qr_code = $qrCode;
+                $registration->save();
+            }
             
             \Log::info('Registration created successfully', [
                 'registration_id' => $registration->id,
                 'event_id' => $event->id,
                 'student_email' => $registration->student_email,
-                'qr_code_length' => strlen($qrCode),
+                'qr_code_length' => $qrCode ? strlen($qrCode) : null,
             ]);
 
             DB::commit();
@@ -228,6 +230,12 @@ class DashboardController extends Controller
             $request->session()->put('student_email', $request->student_email);
             $request->session()->put('student_name', $request->student_name);
             $request->session()->put('student_roll', $request->student_roll);
+
+            if ($event->is_paid) {
+                return redirect()->route('events.register', $event->id)
+                    ->with('success', 'Registration saved. Please complete the payment to confirm.')
+                    ->with('registration_id', $registration->id);
+            }
 
             return redirect()->route('student.events.show', $event->id)
                 ->with('success', 'Successfully registered for the event! Your QR code has been generated.')
@@ -259,7 +267,7 @@ class DashboardController extends Controller
         $studentName = $request->session()->get('student_name', '');
         $studentRoll = $request->session()->get('student_roll', '');
 
-        $event = Event::withCount('registrations')->findOrFail($id);
+        $event = Event::findOrFail($id);
         
         // Check if already registered - check by email from session
         $existingRegistration = null;
@@ -371,6 +379,38 @@ class DashboardController extends Controller
         }
         
         return response()->download($filePath, basename($certificate->file_path));
+    }
+
+    public function viewCertificate($id)
+    {
+        $certificate = Certificate::with(['registration', 'event'])->findOrFail($id);
+        
+        // Verify student owns this certificate
+        $studentEmail = session('student_email');
+        if (!$studentEmail || $certificate->registration->student_email !== $studentEmail) {
+            abort(403, 'Unauthorized access to certificate.');
+        }
+        
+        if (!$certificate->file_path) {
+            abort(404, 'Certificate file not found.');
+        }
+        
+        // Check if file exists in storage (try both student and admin storage)
+        $filePath = storage_path('app/' . $certificate->file_path);
+        if (!file_exists($filePath)) {
+            // Try admin storage as fallback
+            $adminPath = base_path('../eventbookingadmin/storage/app/' . $certificate->file_path);
+            if (file_exists($adminPath)) {
+                $filePath = $adminPath;
+            } else {
+                abort(404, 'Certificate file not found.');
+            }
+        }
+        
+        return response()->file($filePath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="certificate_' . $certificate->id . '.pdf"',
+        ]);
     }
 }
 

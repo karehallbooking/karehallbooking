@@ -35,4 +35,6 @@ return [
         ],
     ],
 
+    'ghostscript_path' => env('GHOSTSCRIPT_PATH'),
+
 ];

@@ -23,10 +23,6 @@
 
         </div>
         <div class="detail-item">
-            <strong>Department:</strong> <?php echo e($event->department); ?>
-
-        </div>
-        <div class="detail-item">
             <strong>Date:</strong> 
             <?php echo e($event->start_date->format('d M Y')); ?>
 
@@ -57,6 +53,24 @@
                 <span class="tag tag-booked">All Booked</span>
             <?php endif; ?>
         </div>
+        <?php if($event->faculty_coordinator_name || $event->faculty_coordinator_contact): ?>
+            <div class="detail-item">
+                <strong>Faculty Coordinator:</strong>
+                <div><?php echo e($event->faculty_coordinator_name ?? 'NA'); ?></div>
+                <?php if($event->faculty_coordinator_contact): ?>
+                    <div>Contact: <?php echo e($event->faculty_coordinator_contact); ?></div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <?php if($event->student_coordinator_name || $event->student_coordinator_contact): ?>
+            <div class="detail-item">
+                <strong>Student Coordinator:</strong>
+                <div><?php echo e($event->student_coordinator_name ?? 'NA'); ?></div>
+                <?php if($event->student_coordinator_contact): ?>
+                    <div>Contact: <?php echo e($event->student_coordinator_contact); ?></div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div style="margin-bottom: 16px;">
@@ -91,19 +105,40 @@
 
 <!-- Registration Section -->
 <?php if($existingRegistration): ?>
-    <div class="section-block" style="background: #e8f5e9; border-color: #4caf50;">
-        <h3 style="color: #2e7d32; margin: 0 0 12px;">✓ You are already registered for this event</h3>
-        <p style="margin: 0; color: #555;">
-            <strong>Registration Date:</strong> <?php echo e($existingRegistration->registered_at->format('d M Y, h:i A')); ?><br>
-            <strong>Payment Status:</strong> <?php echo e(ucfirst($existingRegistration->payment_status)); ?>
+    <?php if($existingRegistration->payment_status === 'paid' && $existingRegistration->ticket): ?>
+        <div class="section-block" style="background: #e8f5e9; border-color: #4caf50;">
+            <h3 style="color: #2e7d32; margin: 0 0 12px;">✓ You are registered for this event</h3>
+            <p style="margin: 0; color: #555;">
+                <strong>Registration Date:</strong> <?php echo e($existingRegistration->registered_at->format('d M Y, h:i A')); ?><br>
+                <strong>Ticket Code:</strong> <?php echo e($existingRegistration->ticket->ticket_code); ?>
 
-        </p>
-        <?php if($existingRegistration->qr_code): ?>
+            </p>
             <div style="margin-top: 12px;">
                 <a href="#" onclick="openTicketModal('<?php echo e(route('student.ticket.show', $existingRegistration->id)); ?>'); return false;" class="btn btn-primary">View Ticket</a>
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php elseif($existingRegistration->payment_status === 'pending' && $event->is_paid): ?>
+        <div class="section-block" style="background: #fff3cd; border-color: #ffc107;">
+            <h3 style="color: #856404; margin: 0 0 12px;">⚠ Payment Required</h3>
+            <p style="margin: 0; color: #555; margin-bottom: 16px;">Your registration is incomplete. Please complete the payment to receive your ticket.</p>
+            <div style="margin-top: 12px;">
+                <a href="<?php echo e(route('events.register', $event->id)); ?>" class="btn btn-primary">Complete Payment</a>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="section-block" style="background: #e8f5e9; border-color: #4caf50;">
+            <h3 style="color: #2e7d32; margin: 0 0 12px;">✓ You are registered for this event</h3>
+            <p style="margin: 0; color: #555;">
+                <strong>Registration Date:</strong> <?php echo e($existingRegistration->registered_at->format('d M Y, h:i A')); ?>
+
+            </p>
+            <?php if($existingRegistration->qr_code): ?>
+                <div style="margin-top: 12px;">
+                    <a href="#" onclick="openTicketModal('<?php echo e(route('student.ticket.show', $existingRegistration->id)); ?>'); return false;" class="btn btn-primary">View Ticket</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 <?php elseif($event->seats_remaining <= 0): ?>
     <div class="section-block" style="background: #ffebee; border-color: #ef5350;">
         <h3 style="color: #c62828; margin: 0;">All seats are booked for this event</h3>
@@ -111,7 +146,9 @@
 <?php else: ?>
     <div class="section-block">
         <h3 style="margin: 0 0 20px; color: #0a2f6c; font-size: 20px; border-bottom: 2px solid #008B8B; padding-bottom: 10px;">Register for this Event</h3>
-        
+        <?php if($event->is_paid && $event->amount > 0): ?>
+            <p style="margin-bottom: 16px; color: #555;">This is a paid event. Please fill in your details below and click the payment button to continue.</p>
+        <?php endif; ?>
         <form method="POST" action="<?php echo e(route('student.events.register', $event->id)); ?>" id="registration-form">
             <?php echo csrf_field(); ?>
             <div class="form-container-row">
@@ -138,7 +175,11 @@
             </div>
             
             <div style="margin-top: 20px; text-align: center;">
-                <button type="submit" class="btn btn-primary" style="padding: 12px 32px; font-size: 15px; font-weight: 600;">Confirm Registration</button>
+                <?php if($event->is_paid && $event->amount > 0): ?>
+                    <button type="submit" class="btn btn-primary" style="padding: 12px 32px; font-size: 15px; font-weight: 600;">Pay ₹<?php echo e(number_format($event->amount, 2)); ?> and Register</button>
+                <?php else: ?>
+                    <button type="submit" class="btn btn-primary" style="padding: 12px 32px; font-size: 15px; font-weight: 600;">Confirm Registration</button>
+                <?php endif; ?>
             </div>
         </form>
     </div>

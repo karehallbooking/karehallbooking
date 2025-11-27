@@ -136,3 +136,321 @@
 [2025-11-22 07:08:17] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
 [2025-11-22 07:13:10] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
 [2025-11-22 07:13:10] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[2,1]} 
+[2025-11-24 06:21:15] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-24 06:21:15] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[2,1]} 
+[2025-11-24 06:21:15] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-24 06:24:24] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-24 06:24:44] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-24 06:24:52] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 02:05:35] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 02:05:35] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[1]} 
+[2025-11-25 02:05:35] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-25 07:40:50] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 07:40:50] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[1]} 
+[2025-11-25 07:40:50] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-25 07:40:53] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 07:41:20] local.INFO: Registration created successfully {"registration_id":3,"event_id":4,"student_email":"99220040900@klu.ac.in","qr_code_length":173} 
+[2025-11-25 07:41:28] local.INFO: Ticket PDF generated successfully {"registration_id":3,"file_path":"C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\storage\\app/registrations/ticket_3.pdf","file_exists":true,"file_size":7485} 
+[2025-11-25 07:41:45] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 07:41:48] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 07:41:48] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-25 07:41:48] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-25 07:41:49] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 07:41:49] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-25 07:41:53] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-25 07:41:53] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-25 07:41:53] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-26 05:25:09] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:25:09] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:25:09] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-26 05:25:11] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:25:11] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:25:11] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-26 05:37:00] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:37:12] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:37:34] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:37:34] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:37:34] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-26 05:37:40] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:37:43] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:37:43] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:37:43] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-26 05:38:55] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:40:01] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:40:01] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:40:01] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-26 05:40:19] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:40:19] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:42:56] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-26 05:42:56] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-26 05:42:56] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-27 05:14:58] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:14:59] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-27 05:14:59] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-27 05:16:48] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:16:48] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-27 05:16:48] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[2]} 
+[2025-11-27 05:16:50] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:16:51] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[3,1]} 
+[2025-11-27 05:16:55] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:19:37] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:19:39] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:19:54] local.INFO: Registration created successfully {"registration_id":4,"event_id":5,"student_email":"99220040900@klu.ac.in","qr_code_length":173} 
+[2025-11-27 05:20:08] local.INFO: Ticket PDF generated successfully {"registration_id":4,"file_path":"C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\storage\\app/registrations/ticket_4.pdf","file_exists":true,"file_size":7464} 
+[2025-11-27 05:26:09] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:26:39] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 05:35:21] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 05:35:21] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 05:35:21] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 05:35:24] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 05:35:24] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 05:35:24] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 05:35:32] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:00:53] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:04:42] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:04:45] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:09:12] local.ERROR: Class "Razorpay\Api\Api" not found {"exception":"[object] (Error(code: 0): Class \"Razorpay\\Api\\Api\" not found at C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\app\\Services\\RazorpayService.php:27)
+[stacktrace]
+#0 [internal function]: App\\Services\\RazorpayService->__construct()
+#1 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1062): ReflectionClass->newInstanceArgs(Array)
+#2 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(890): Illuminate\\Container\\Container->build('App\\\\Services\\\\Ra...')
+#3 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Services\\\\Ra...', Array, true)
+#4 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(821): Illuminate\\Foundation\\Application->resolve('App\\\\Services\\\\Ra...', Array)
+#5 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Services\\\\Ra...', Array)
+#6 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1207): Illuminate\\Foundation\\Application->make('App\\\\Services\\\\Ra...')
+#7 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1101): Illuminate\\Container\\Container->resolveClass(Object(ReflectionParameter))
+#8 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1052): Illuminate\\Container\\Container->resolveDependencies(Array)
+#9 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(890): Illuminate\\Container\\Container->build('App\\\\Http\\\\Contro...')
+#10 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Http\\\\Contro...', Array, true)
+#11 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(821): Illuminate\\Foundation\\Application->resolve('App\\\\Http\\\\Contro...', Array)
+#12 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Http\\\\Contro...', Array)
+#13 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(285): Illuminate\\Foundation\\Application->make('App\\\\Http\\\\Contro...')
+#14 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(267): Illuminate\\Routing\\Route->getController()
+#15 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(212): Illuminate\\Routing\\Route->runController()
+#16 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(808): Illuminate\\Routing\\Route->run()
+#17 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(170): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#18 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Middleware\\SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken.php(88): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#22 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\View\\Middleware\\ShareErrorsFromSession.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Session\\Middleware\\StartSession.php(121): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Session\\Middleware\\StartSession.php(64): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#26 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse.php(37): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Cookie\\Middleware\\EncryptCookies.php(75): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#33 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#34 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#35 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#36 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(201): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#37 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#38 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#45 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\HandleCors.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#49 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#50 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#51 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#52 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#53 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#58 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#59 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#60 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\public\\index.php(20): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#61 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(23): require_once('C:\\\\Users\\\\sande\\\\...')
+#62 {main}
+"} 
+[2025-11-27 06:28:59] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:29:01] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:29:01] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 06:29:01] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 06:29:03] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:29:03] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 06:29:03] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 06:29:05] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 06:33:51] local.ERROR: Registration failed: Undefined variable $qrCode {"event_id":"6","student_email":"99220040900@klu.ac.in","student_name":"KOTARI SANDEEP","error":"Undefined variable $qrCode","file":"C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\app\\Http\\Controllers\\Student\\DashboardController.php","line":223,"trace":"#0 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php(256): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'Undefined varia...', 'C:\\\\Users\\\\sande\\\\...', 223)
+#1 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\app\\Http\\Controllers\\Student\\DashboardController.php(223): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'Undefined varia...', 'C:\\\\Users\\\\sande\\\\...', 223)
+#2 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\ControllerDispatcher.php(47): App\\Http\\Controllers\\Student\\DashboardController->register(Object(Illuminate\\Http\\Request), '6')
+#3 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(266): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\Student\\DashboardController), 'register')
+#4 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(212): Illuminate\\Routing\\Route->runController()
+#5 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(808): Illuminate\\Routing\\Route->run()
+#6 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(170): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#7 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Middleware\\SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#8 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#9 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken.php(88): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#10 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#11 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\View\\Middleware\\ShareErrorsFromSession.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#12 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#13 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Session\\Middleware\\StartSession.php(121): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#14 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Session\\Middleware\\StartSession.php(64): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#15 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#16 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse.php(37): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#17 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#18 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Cookie\\Middleware\\EncryptCookies.php(75): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#22 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#23 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#24 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#25 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(201): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#26 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#27 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#31 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#32 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#34 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#35 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#36 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#37 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\HandleCors.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#38 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#39 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#40 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#44 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#45 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#46 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#47 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#48 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#49 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\public\\index.php(20): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#50 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(23): require_once('C:\\\\Users\\\\sande\\\\...')
+#51 {main}"} 
+[2025-11-27 08:26:00] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 08:26:01] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 08:26:01] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 08:26:07] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 08:26:07] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 08:26:07] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-27 08:26:10] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 08:26:23] local.INFO: Registration created successfully {"registration_id":6,"event_id":6,"student_email":"99220040900@klu.ac.in","qr_code_length":null} 
+[2025-11-27 08:26:24] local.ERROR: Class "Razorpay\Api\Api" not found {"exception":"[object] (Error(code: 0): Class \"Razorpay\\Api\\Api\" not found at C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\app\\Services\\RazorpayService.php:27)
+[stacktrace]
+#0 [internal function]: App\\Services\\RazorpayService->__construct()
+#1 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1062): ReflectionClass->newInstanceArgs(Array)
+#2 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(890): Illuminate\\Container\\Container->build('App\\\\Services\\\\Ra...')
+#3 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Services\\\\Ra...', Array, true)
+#4 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(821): Illuminate\\Foundation\\Application->resolve('App\\\\Services\\\\Ra...', Array)
+#5 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Services\\\\Ra...', Array)
+#6 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1207): Illuminate\\Foundation\\Application->make('App\\\\Services\\\\Ra...')
+#7 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1101): Illuminate\\Container\\Container->resolveClass(Object(ReflectionParameter))
+#8 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(1052): Illuminate\\Container\\Container->resolveDependencies(Array)
+#9 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(890): Illuminate\\Container\\Container->build('App\\\\Http\\\\Contro...')
+#10 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1078): Illuminate\\Container\\Container->resolve('App\\\\Http\\\\Contro...', Array, true)
+#11 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(821): Illuminate\\Foundation\\Application->resolve('App\\\\Http\\\\Contro...', Array)
+#12 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1058): Illuminate\\Container\\Container->make('App\\\\Http\\\\Contro...', Array)
+#13 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(285): Illuminate\\Foundation\\Application->make('App\\\\Http\\\\Contro...')
+#14 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(267): Illuminate\\Routing\\Route->getController()
+#15 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Route.php(212): Illuminate\\Routing\\Route->runController()
+#16 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(808): Illuminate\\Routing\\Route->run()
+#17 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(170): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}(Object(Illuminate\\Http\\Request))
+#18 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Middleware\\SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#19 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken.php(88): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#21 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#22 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\View\\Middleware\\ShareErrorsFromSession.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#23 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\View\\Middleware\\ShareErrorsFromSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#24 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Session\\Middleware\\StartSession.php(121): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#25 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Session\\Middleware\\StartSession.php(64): Illuminate\\Session\\Middleware\\StartSession->handleStatefulRequest(Object(Illuminate\\Http\\Request), Object(Illuminate\\Session\\Store), Object(Closure))
+#26 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Session\\Middleware\\StartSession->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse.php(37): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#28 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Cookie\\Middleware\\EncryptCookies.php(75): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#30 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Cookie\\Middleware\\EncryptCookies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#32 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(807): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#33 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#34 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(750): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#35 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#36 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(201): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#37 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}(Object(Illuminate\\Http\\Request))
+#38 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#39 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#41 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#42 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#43 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#45 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#47 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#48 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\HandleCors.php(49): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#49 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#50 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#51 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#52 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#53 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#54 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Http\\Middleware\\ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#55 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#56 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Pipeline\\Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}(Object(Illuminate\\Http\\Request))
+#57 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#58 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Http\\Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#59 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#60 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\public\\index.php(20): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#61 C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(23): require_once('C:\\\\Users\\\\sande\\\\...')
+#62 {main}
+"} 
+[2025-11-27 08:37:07] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:37:08] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:37:08] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[6]} 
+[2025-11-27 08:37:08] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-27 08:37:11] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:37:11] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[6]} 
+[2025-11-27 08:37:11] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-27 08:37:12] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:38:07] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:39:19] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:39:21] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:39:21] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[6]} 
+[2025-11-27 08:39:21] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-27 08:39:23] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:39:23] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[6]} 
+[2025-11-27 08:39:25] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:39:25] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[6]} 
+[2025-11-27 08:39:25] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-27 08:39:41] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 08:41:06] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-27 08:41:19] local.INFO: Registration created successfully {"registration_id":7,"event_id":7,"student_email":"99220040900@klu.ac.in","qr_code_length":null} 
+[2025-11-27 08:41:32] local.INFO: Creating Razorpay order {"event_id":7,"registration_id":7,"amount":5000,"currency":"INR"} 
+[2025-11-27 08:41:34] local.INFO: Razorpay order created successfully {"order_id":"order_RkhafhVJUYvWXa","amount":5000,"status":"created"} 
+[2025-11-27 08:41:34] local.INFO: Razorpay order created for registration {"registration_id":7,"payment_id":1,"order_id":"order_RkhafhVJUYvWXa","amount":5000} 
+[2025-11-27 08:42:09] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:42:19] local.INFO: Creating Razorpay order {"event_id":7,"registration_id":7,"amount":5000,"currency":"INR"} 
+[2025-11-27 08:42:20] local.INFO: Razorpay order created successfully {"order_id":"order_RkhbU5LmqqzCLJ","amount":5000,"status":"created"} 
+[2025-11-27 08:42:20] local.INFO: Razorpay order created for registration {"registration_id":7,"payment_id":2,"order_id":"order_RkhbU5LmqqzCLJ","amount":5000} 
+[2025-11-27 08:42:40] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:58:47] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:59:00] local.INFO: Creating Razorpay order {"event_id":7,"registration_id":7,"amount":5000,"currency":"INR"} 
+[2025-11-27 08:59:01] local.INFO: Razorpay order created successfully {"order_id":"order_Rkht6VTBbC9LUP","amount":5000,"status":"created"} 
+[2025-11-27 08:59:01] local.INFO: Razorpay order created for registration {"registration_id":7,"payment_id":3,"order_id":"order_Rkht6VTBbC9LUP","amount":5000} 
+[2025-11-27 08:59:17] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:59:20] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 08:59:20] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[7]} 
+[2025-11-27 08:59:20] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-27 10:57:38] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 10:57:38] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[7]} 
+[2025-11-27 10:57:38] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-27 10:57:41] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 10:57:49] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 10:57:51] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-27 10:57:51] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[7]} 
+[2025-11-27 10:57:51] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 

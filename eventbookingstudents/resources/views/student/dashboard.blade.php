@@ -191,7 +191,8 @@
                         </div>
                         <div>
                             @if($registration->certificate_issued && $registration->certificate)
-                                <a href="{{ route('student.certificates.download', $registration->certificate->id) }}" target="_blank" class="btn btn-link">Download Certificate</a>
+                                <a href="#" onclick="openPdfModal('{{ route('student.certificates.view', $registration->certificate->id) }}', 'Certificate - {{ $registration->event->title }}'); return false;" class="btn btn-link">View Certificate</a>
+                                <a href="{{ route('student.certificates.download', $registration->certificate->id) }}" target="_blank" class="btn btn-link" style="margin-left: 8px;">Download</a>
                             @else
                                 <span style="color: #999; font-size: 13px;">Certificate not issued</span>
                             @endif
@@ -226,7 +227,8 @@
                             </span>
                         </div>
                         <div>
-                            <a href="{{ route('student.certificates.download', $certificate->id) }}" target="_blank" class="btn btn-link">Download Certificate</a>
+                            <a href="#" onclick="openPdfModal('{{ route('student.certificates.view', $certificate->id) }}', 'Certificate - {{ $certificate->event->title }}'); return false;" class="btn btn-link">View Certificate</a>
+                            <a href="{{ route('student.certificates.download', $certificate->id) }}" target="_blank" class="btn btn-link" style="margin-left: 8px;">Download</a>
                         </div>
                     </div>
                 @endforeach

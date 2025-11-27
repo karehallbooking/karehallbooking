@@ -1,0 +1,63 @@
+================================================================================
+QUICK FIX: Enable Imagick Extension in php.ini
+================================================================================
+
+STEP 1: Open php.ini as Administrator
+--------------------------------------
+1. Press Win + X
+2. Select "Windows PowerShell (Admin)" or "Terminal (Admin)"
+3. Run this command:
+   
+   notepad "C:\Program Files\php-8.3.27-Win32-vs16-x64\php.ini"
+
+STEP 2: Add Imagick Extension
+-------------------------------
+1. In Notepad, press Ctrl+F to search
+2. Search for: extension=
+3. Find a section with other extensions (like extension=gd, extension=mysqli, etc.)
+4. Add this NEW line (or uncomment if you see ;extension=imagick):
+   
+   extension=imagick
+
+5. Save the file (Ctrl+S)
+6. Close Notepad
+
+STEP 3: Install ImageMagick (Required)
+----------------------------------------
+1. Download from: https://imagemagick.org/script/download.php#windows
+2. Download: ImageMagick-7.x.x-Q16-HDRI-x64-dll.exe
+3. Run the installer
+4. ✅ IMPORTANT: Check "Add application directory to your system path"
+5. Complete installation
+
+STEP 4: Restart
+---------------
+1. Close ALL PowerShell/Command Prompt windows
+2. Restart your computer (to load PATH)
+3. Or just restart Laravel server:
+   
+   php artisan serve --port=9000
+
+STEP 5: Verify
+--------------
+Open NEW PowerShell and run:
+
+php -m | findstr -i imagick
+
+Should show: imagick
+
+================================================================================
+ALTERNATIVE: If you can't edit php.ini
+================================================================================
+
+You can also add it via command line (as Administrator):
+
+1. Open PowerShell as Admin
+2. Run:
+   
+   Add-Content -Path "C:\Program Files\php-8.3.27-Win32-vs16-x64\php.ini" -Value "`nextension=imagick"
+
+3. Restart server
+
+================================================================================
+

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title><?php echo e($title ?? 'Student Dashboard - Event Booking'); ?></title>
     <style>
         * {
@@ -628,6 +629,8 @@
             });
         });
     </script>
+
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
 

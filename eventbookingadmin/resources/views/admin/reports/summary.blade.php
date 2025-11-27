@@ -23,7 +23,7 @@
                 <tr>
                     <td>{{ $event->title }}</td>
                     <td>{{ optional($event->start_date)->format('Y-m-d') }} - {{ optional($event->end_date)->format('Y-m-d') }}</td>
-                    <td>{{ $event->registrations_count }}</td>
+                    <td>{{ $event->registrations_count ?? $event->registrations()->where('payment_status', 'paid')->count() }}</td>
                 </tr>
             @endforeach
         </tbody>

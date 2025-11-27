@@ -38,6 +38,8 @@ Route::prefix('registrations')->name('admin.registrations.')->group(function () 
     Route::post('/{registration}/payment-status', [RegistrationController::class, 'updatePaymentStatus'])->name('payment-status');
     Route::post('/{registration}/qr/regenerate', [RegistrationController::class, 'regenerateQr'])->name('qr.regenerate');
     Route::get('/{registration}/qr/download', [RegistrationController::class, 'downloadQr'])->name('qr.download');
+    Route::post('/{registration}/ticket/generate', [RegistrationController::class, 'generateTicket'])->name('ticket.generate');
+    Route::post('/event/{event}/tickets/bulk-generate', [RegistrationController::class, 'bulkGenerateTickets'])->name('tickets.bulk-generate');
 });
 
 Route::prefix('scanner')->name('admin.scanner.')->group(function () {

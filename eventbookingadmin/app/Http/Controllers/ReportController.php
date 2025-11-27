@@ -65,7 +65,7 @@ class ReportController extends Controller
 
     public function printSummary()
     {
-        $events = Event::withCount('registrations')->orderBy('start_date')->get();
+        $events = Event::orderBy('start_date')->get();
         return view('admin.reports.summary', compact('events'));
     }
 

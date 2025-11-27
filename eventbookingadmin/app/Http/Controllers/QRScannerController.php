@@ -13,14 +13,14 @@ class QRScannerController extends Controller
 {
     public function index(Request $request)
     {
-        $events = Event::withCount('registrations')->orderBy('start_date', 'desc')->orderBy('title')->get();
+        $events = Event::orderBy('start_date', 'desc')->orderBy('title')->get();
         $selectedEventId = $request->get('event_id');
         $selectedEvent = null;
         $students = collect();
         $result = session('scanner_result');
 
         if ($selectedEventId) {
-            $selectedEvent = Event::withCount('registrations')->findOrFail($selectedEventId);
+            $selectedEvent = Event::findOrFail($selectedEventId);
             
             // Get present and absent students for this event only
             $students = Registration::with('event')
