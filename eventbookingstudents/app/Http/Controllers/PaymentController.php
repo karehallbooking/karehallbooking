@@ -6,7 +6,7 @@ use App\Models\Payment;
 use App\Models\Registration;
 use App\Models\Ticket;
 use App\Models\Event;
-use App\Services\RazorpayService;
+use App\Services\BillDeskService;
 use App\Helpers\QRHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,125 +16,86 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
-    protected $razorpayService;
+    protected $billdeskService;
 
-    public function __construct(RazorpayService $razorpayService)
+    public function __construct(BillDeskService $billdeskService)
     {
-        $this->razorpayService = $razorpayService;
+        $this->billdeskService = $billdeskService;
     }
 
     /**
-     * Handle payment success callback from Razorpay
+     * BillDesk callback (success / failure)
      */
-    public function handlePaymentSuccess(Request $request)
+    public function billdeskCallback(Request $request)
     {
-        $request->validate([
-            'razorpay_order_id' => 'required|string',
-            'razorpay_payment_id' => 'required|string',
-            'razorpay_signature' => 'required|string',
-        ]);
+        $payload = $request->all();
+        $orderId = $payload['orderid'] ?? $payload['ORDER_ID'] ?? null;
+        $statusRaw = $payload['status'] ?? $payload['STATUS'] ?? null;
+        $transactionId = $payload['transactionid'] ?? $payload['TRANSACTION_ID'] ?? null;
+        $checksum = $payload['checksum'] ?? $payload['CHECKSUM'] ?? null;
+
+        if (!$orderId) {
+            Log::error('BillDesk callback missing order id', ['payload' => $payload]);
+            return redirect()->route('payment.failure')->with('error', 'Payment reference missing.');
+        }
+
+        if ($checksum && !$this->billdeskService->verifyChecksum($payload, $checksum)) {
+            Log::warning('BillDesk checksum verification failed', ['order_id' => $orderId]);
+            return redirect()->route('payment.failure')->with('error', 'Payment verification failed.');
+        }
 
         try {
-            // Verify payment signature
-            $attributes = [
-                'razorpay_order_id' => $request->razorpay_order_id,
-                'razorpay_payment_id' => $request->razorpay_payment_id,
-                'razorpay_signature' => $request->razorpay_signature,
-            ];
-
-            if (!$this->razorpayService->verifyPaymentSignature($attributes)) {
-                Log::warning('Payment signature verification failed', [
-                    'order_id' => $request->razorpay_order_id,
-                    'payment_id' => $request->razorpay_payment_id,
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payment verification failed. Please contact support.',
-                    'redirect_url' => route('payment.failure'),
-                ], 400);
-            }
-
-            return DB::transaction(function () use ($request, $attributes) {
-                // Find payment by order ID (lock for update to prevent race conditions)
-                $payment = Payment::where('razorpay_order_id', $request->razorpay_order_id)
-                    ->lockForUpdate()
-                    ->first();
+            return DB::transaction(function () use ($orderId, $statusRaw, $transactionId, $payload) {
+                $payment = Payment::where('razorpay_order_id', $orderId)->lockForUpdate()->first();
 
                 if (!$payment) {
-                    Log::error('Payment not found for order', [
-                        'order_id' => $request->razorpay_order_id,
-                    ]);
-
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Payment record not found.',
-                        'redirect_url' => route('payment.failure'),
-                    ], 404);
+                    Log::error('Payment not found for BillDesk callback', ['order_id' => $orderId]);
+                    return redirect()->route('payment.failure')->with('error', 'Payment not found.');
                 }
 
-                // Idempotent check: if already processed, return existing ticket
+                $status = $this->billdeskService->normalizeStatus($statusRaw);
+
+                // Idempotent check
                 if ($payment->status === 'success') {
-                    $registration = $payment->registration;
-                    $ticket = $registration->ticket;
-
+                    $ticket = optional($payment->registration)->ticket;
                     if ($ticket) {
-                        Log::info('Payment already processed, returning existing ticket', [
-                            'payment_id' => $payment->id,
-                            'ticket_code' => $ticket->ticket_code,
-                        ]);
-
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Payment already processed.',
-                            'redirect_url' => route('payment.success', ['ticket' => $ticket->ticket_code]),
-                        ]);
+                        return redirect()->route('payment.success', ['ticket' => $ticket->ticket_code]);
                     }
                 }
 
-                // Update payment status
+                if ($status === 'success') {
+                    $payment->update([
+                        'status' => 'success',
+                        'transaction_id' => $transactionId ?? $payment->transaction_id,
+                        'payment_method' => 'billdesk',
+                        'paid_at' => now(),
+                        'meta' => $payload,
+                    ]);
+
+                    $registration = $payment->registration;
+                    $registration->update(['payment_status' => 'paid']);
+
+                    $ticket = $this->generateTicket($registration);
+
+                    return redirect()->route('payment.success', ['ticket' => $ticket->ticket_code]);
+                }
+
+                // Failure / pending
                 $payment->update([
-                    'status' => 'success',
-                    'razorpay_payment_id' => $request->razorpay_payment_id,
-                    'razorpay_signature' => $request->razorpay_signature,
-                    'paid_at' => now(),
-                    'payment_method' => 'razorpay',
-                    'transaction_id' => $request->razorpay_payment_id,
+                    'status' => $status === 'pending' ? 'pending' : 'failed',
+                    'transaction_id' => $transactionId ?? $payment->transaction_id,
+                    'payment_method' => 'billdesk',
+                    'meta' => $payload,
                 ]);
 
-                // Update registration status
-                $registration = $payment->registration;
-                $registration->update([
-                    'payment_status' => 'paid',
-                ]);
-
-                // Generate ticket (this will also generate QR code if not exists)
-                $ticket = $this->generateTicket($registration);
-
-                Log::info('Payment processed successfully', [
-                    'payment_id' => $payment->id,
-                    'registration_id' => $registration->id,
-                    'ticket_code' => $ticket->ticket_code,
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Payment successful!',
-                    'redirect_url' => route('payment.success', ['ticket' => $ticket->ticket_code]),
-                ]);
+                return redirect()->route('payment.failure');
             });
         } catch (\Exception $e) {
-            Log::error('Payment processing failed', [
-                'order_id' => $request->razorpay_order_id,
+            Log::error('BillDesk callback processing failed', [
+                'order_id' => $orderId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Payment processing failed: ' . $e->getMessage(),
-                'redirect_url' => route('payment.failure'),
-            ], 500);
+            return redirect()->route('payment.failure')->with('error', 'Payment processing failed.');
         }
     }
 
@@ -164,140 +125,11 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle payment failure
-     */
-    public function handlePaymentFailure(Request $request)
-    {
-        $orderId = $request->input('razorpay_order_id');
-
-        if ($orderId) {
-            $payment = Payment::where('razorpay_order_id', $orderId)->first();
-
-            if ($payment && $payment->status === 'pending') {
-                $payment->update([
-                    'status' => 'failed',
-                ]);
-
-                Log::info('Payment marked as failed', [
-                    'payment_id' => $payment->id,
-                    'order_id' => $orderId,
-                ]);
-            }
-        }
-
-        return redirect()->route('payment.failure');
-    }
-
-    /**
      * Show payment failure page
      */
     public function failurePage()
     {
         return view('payment.failure');
-    }
-
-    /**
-     * Handle Razorpay webhook
-     */
-    public function handleWebhook(Request $request)
-    {
-        $payload = $request->getContent();
-        $signature = $request->header('X-Razorpay-Signature');
-
-        if (!$signature) {
-            Log::warning('Razorpay webhook received without signature');
-            return response()->json(['error' => 'Missing signature'], 400);
-        }
-
-        // Verify webhook signature
-        if (!$this->razorpayService->verifyWebhookSignature($payload, $signature)) {
-            Log::warning('Razorpay webhook signature verification failed', [
-                'signature' => $signature,
-            ]);
-            return response()->json(['error' => 'Invalid signature'], 400);
-        }
-
-        $data = json_decode($payload, true);
-        $eventType = $data['event'] ?? null;
-
-        Log::info('Razorpay webhook received', [
-            'event' => $eventType,
-            'payload' => $data,
-        ]);
-
-        // Handle payment.captured event
-        if ($eventType === 'payment.captured') {
-            $paymentData = $data['payload']['payment']['entity'] ?? null;
-            $orderId = $paymentData['order_id'] ?? null;
-            $paymentId = $paymentData['id'] ?? null;
-
-            if (!$orderId || !$paymentId) {
-                Log::error('Invalid webhook payload for payment.captured', [
-                    'payload' => $data,
-                ]);
-                return response()->json(['error' => 'Invalid payload'], 400);
-            }
-
-            try {
-                return DB::transaction(function () use ($orderId, $paymentId, $paymentData) {
-                    $payment = Payment::where('razorpay_order_id', $orderId)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if (!$payment) {
-                        Log::error('Payment not found for webhook', [
-                            'order_id' => $orderId,
-                        ]);
-                        return response()->json(['error' => 'Payment not found'], 404);
-                    }
-
-                    // Idempotent: if already success, return OK
-                    if ($payment->status === 'success') {
-                        Log::info('Payment already processed via webhook', [
-                            'payment_id' => $payment->id,
-                        ]);
-                        return response()->json(['status' => 'ok']);
-                    }
-
-                    // Update payment
-                    $payment->update([
-                        'status' => 'success',
-                        'razorpay_payment_id' => $paymentId,
-                        'razorpay_signature' => $paymentData['signature'] ?? null,
-                        'paid_at' => now(),
-                        'payment_method' => 'razorpay',
-                        'transaction_id' => $paymentId,
-                    ]);
-
-                    // Update registration
-                    $registration = $payment->registration;
-                    $registration->update([
-                        'payment_status' => 'paid',
-                    ]);
-
-                    // Generate ticket
-                    $this->generateTicket($registration);
-
-                    Log::info('Webhook payment processed successfully', [
-                        'payment_id' => $payment->id,
-                        'registration_id' => $registration->id,
-                    ]);
-
-                    return response()->json(['status' => 'ok']);
-                });
-            } catch (\Exception $e) {
-                Log::error('Webhook processing failed', [
-                    'order_id' => $orderId,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
-                return response()->json(['error' => 'Processing failed'], 500);
-            }
-        }
-
-        // For other events, just acknowledge
-        return response()->json(['status' => 'ok']);
     }
 
     /**

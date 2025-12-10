@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\StudentTokenHelper;
 use App\Models\Registration;
 use App\Helpers\QRHelper;
 use Barryvdh\DomPDF\Facade\Pdf as DomPDF;
@@ -15,23 +16,60 @@ class TicketController extends Controller
     {
         $registration = Registration::with(['event', 'ticket'])->findOrFail($id);
         
-        // Optional: Verify student email matches (for security)
+        // Verify event exists
+        if (!$registration->event) {
+            \Log::error('Event not found for registration', [
+                'registration_id' => $registration->id,
+                'event_id' => $registration->event_id,
+            ]);
+            abort(404, 'Event not found for this registration.');
+        }
+        
+        // Verify student owns this ticket - check by token if available, otherwise by email
+        $studentToken = StudentTokenHelper::getToken($request);
         $studentEmail = $request->session()->get('student_email');
-        if ($studentEmail && $registration->student_email !== $studentEmail) {
+        
+        $isAuthorized = false;
+        if ($studentToken && $registration->student_token === $studentToken) {
+            $isAuthorized = true;
+        } elseif ($studentEmail && $registration->student_email === $studentEmail) {
+            $isAuthorized = true;
+        } elseif (!$studentToken && !$studentEmail) {
+            // No identifier available - allow access for backward compatibility during transition
+            $isAuthorized = true;
+        }
+        
+        if (!$isAuthorized) {
             abort(403, 'Unauthorized access to this ticket.');
         }
 
-        // Only allow ticket viewing for paid registrations with tickets
-        if ($registration->payment_status !== 'paid') {
+        // For paid events, require payment to be completed
+        if ($registration->event->is_paid && $registration->payment_status !== 'paid') {
             abort(403, 'Ticket is only available after payment is completed.');
         }
 
-        if (!$registration->ticket) {
-            abort(404, 'Ticket not found. Please contact support if payment was completed.');
+        // For paid events, we need a ticket record
+        // For free events, ticket record is optional (QR code is sufficient)
+        if ($registration->event->is_paid) {
+            if (!$registration->ticket) {
+                \Log::warning('Ticket record not found for paid event registration', [
+                    'registration_id' => $registration->id,
+                    'event_id' => $registration->event_id,
+                    'payment_status' => $registration->payment_status,
+                ]);
+                abort(404, 'Ticket not found. Please contact support if payment was completed.');
+            }
         }
 
+        // QR code is required for all events (free or paid)
         if (!$registration->qr_code) {
-            abort(404, 'QR code not found for this registration.');
+            \Log::error('QR code not found for registration', [
+                'registration_id' => $registration->id,
+                'event_id' => $registration->event_id,
+                'is_paid' => $registration->event->is_paid,
+                'payment_status' => $registration->payment_status,
+            ]);
+            abort(404, 'QR code not found for this registration. Please contact support.');
         }
 
         // Check if ticket PDF already exists

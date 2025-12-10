@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Student Token Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Allow student token to be passed via query parameter for testing.
+    | Set to false in production. Only enable during local testing before
+    | portal integration is complete.
+    |
+    */
+
+    'allow_student_token_query_param' => env('ALLOW_STUDENT_TOKEN_QUERY_PARAM', false),
+
 ];

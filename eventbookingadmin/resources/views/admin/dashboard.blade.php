@@ -1,13 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="status-banner">
-    System Update: All services are operational.
-</div>
-
 <div class="section-block" style="margin-bottom: 24px;">
     <h2>Admin Control Center</h2>
-    <p>Monitor quick stats and jump straight into any management section.</p>
 </div>
 
 <div class="stat-grid">

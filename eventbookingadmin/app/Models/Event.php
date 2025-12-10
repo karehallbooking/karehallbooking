@@ -23,11 +23,20 @@ class Event extends Model
         'start_time',
         'end_time',
         'capacity',
+        'attendance_sessions',
         'is_paid',
         'amount',
         'registrations_count',
         'brochure_path',
         'attachment_path',
+        'completion_event_form_path',
+        'completion_circular_path',
+        'completion_brochure_path',
+        'completion_report_path',
+        'completion_attendance_path',
+        'completion_feedback_path',
+        'completion_sample_certificate_path',
+        'completion_image_paths',
         'certificate_template_path',
         'certificate_text_prefix',
         'certificate_text_before_date',
@@ -50,6 +59,11 @@ class Event extends Model
     public function attendanceLogs()
     {
         return $this->hasMany(AttendanceLog::class);
+    }
+
+    public function attendanceSessions()
+    {
+        return $this->hasMany(AttendanceSession::class);
     }
 
     public function payments()

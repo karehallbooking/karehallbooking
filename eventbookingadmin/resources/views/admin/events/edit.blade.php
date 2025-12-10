@@ -71,18 +71,18 @@
             <label>Event Club
                 <select name="event_club" id="event_club_edit" required onchange="toggleOtherClubInputEdit()">
                     <option value="">-- Select Club --</option>
-                    <option value="Technical Club" @selected(old('event_club', $event->event_club) === 'Technical Club')>Technical Club</option>
-                    <option value="Cultural Club" @selected(old('event_club', $event->event_club) === 'Cultural Club')>Cultural Club</option>
-                    <option value="Sports Club" @selected(old('event_club', $event->event_club) === 'Sports Club')>Sports Club</option>
-                    <option value="Literary Club" @selected(old('event_club', $event->event_club) === 'Literary Club')>Literary Club</option>
-                    <option value="Music Club" @selected(old('event_club', $event->event_club) === 'Music Club')>Music Club</option>
-                    <option value="Dance Club" @selected(old('event_club', $event->event_club) === 'Dance Club')>Dance Club</option>
+                    <option value="Fine Arts" @selected(old('event_club', $event->event_club) === 'Fine Arts')>Fine Arts</option>
+                    <option value="Green Army" @selected(old('event_club', $event->event_club) === 'Green Army')>Green Army</option>
+                    <option value="Nature Club" @selected(old('event_club', $event->event_club) === 'Nature Club')>Nature Club</option>
+                    <option value="NCC" @selected(old('event_club', $event->event_club) === 'NCC')>NCC</option>
+                    <option value="NSS" @selected(old('event_club', $event->event_club) === 'NSS')>NSS</option>
                     <option value="Photography Club" @selected(old('event_club', $event->event_club) === 'Photography Club')>Photography Club</option>
-                    <option value="NSS Club" @selected(old('event_club', $event->event_club) === 'NSS Club')>NSS Club</option>
-                    <option value="NCC Club" @selected(old('event_club', $event->event_club) === 'NCC Club')>NCC Club</option>
-                    <option value="Robotics Club" @selected(old('event_club', $event->event_club) === 'Robotics Club')>Robotics Club</option>
-                    <option value="Eco Club" @selected(old('event_club', $event->event_club) === 'Eco Club')>Eco Club</option>
-                    <option value="Entrepreneurship Club" @selected(old('event_club', $event->event_club) === 'Entrepreneurship Club')>Entrepreneurship Club</option>
+                    <option value="Sherlock Holmes Club" @selected(old('event_club', $event->event_club) === 'Sherlock Holmes Club')>Sherlock Holmes Club</option>
+                    <option value="Sports" @selected(old('event_club', $event->event_club) === 'Sports')>Sports</option>
+                    <option value="Tamil Mandram" @selected(old('event_club', $event->event_club) === 'Tamil Mandram')>Tamil Mandram</option>
+                    <option value="Vishaka Club" @selected(old('event_club', $event->event_club) === 'Vishaka Club')>Vishaka Club</option>
+                    <option value="YRC" @selected(old('event_club', $event->event_club) === 'YRC')>YRC</option>
+                    <option value="YUVA Tourism" @selected(old('event_club', $event->event_club) === 'YUVA Tourism')>YUVA Tourism</option>
                     <option value="Other" @selected(old('event_club', $event->event_club) === 'Other')>Other</option>
                 </select>
             </label>
@@ -133,7 +133,6 @@
                         <option value="{{ $time }}" @selected($selectedStartTime === $time)>{{ $time }}</option>
                     @endforeach
                 </select>
-                <span class="time-select-hint">Scroll to see all hours</span>
             </label>
             <label class="time-select-group">To time (24-hour format)
                 <select name="end_time" class="time-select" size="5" required>
@@ -142,13 +141,40 @@
                         <option value="{{ $time }}" @selected($selectedEndTime === $time)>{{ $time }}</option>
                     @endforeach
                 </select>
-                <span class="time-select-hint">Five slots visible, scroll for more</span>
             </label>
         </div>
         <div class="form-row two-col">
             <label>How many seats available
                 <input type="number" name="capacity" min="1" value="{{ old('capacity', $event->capacity) }}" required>
             </label>
+        </div>
+        <div class="section-block" style="margin-top:16px;">
+            <h3>Attendance Sessions (Date-wise)</h3>
+            <p style="font-size: 13px; color:#4a5d78; margin-top:0;">
+                Date-wise attendance configuration for this event. Adjust session counts per day as needed.
+            </p>
+            <div id="attendance-sessions-edit-container">
+                @php
+                    $oldSessions = old('attendance_sessions');
+                    $sessionMap = $oldSessions ?: ($event->attendanceSessions->pluck('session_count', 'session_date')->mapWithKeys(function($v, $k) {
+                        return [\Carbon\Carbon::parse($k)->format('Y-m-d') => $v];
+                    })->toArray());
+                @endphp
+                @if($sessionMap)
+                    @foreach($sessionMap as $date => $count)
+                        <div class="form-row two-col" data-attendance-row="{{ $date }}" style="margin-bottom:8px;">
+                            <label>Date
+                                <input type="text" value="{{ $date }}" readonly style="background:#f5f8ff;">
+                            </label>
+                            <label>Sessions on {{ $date }}
+                                <input type="number" name="attendance_sessions[{{ $date }}]" min="1" max="10" value="{{ $count }}" required>
+                            </label>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+        <div class="form-row two-col">
             @php($pricing = old('pricing_type', $event->is_paid ? 'paid' : 'free'))
             <label>Paid or Free
                 <select name="pricing_type" id="pricingTypeEdit" required>
@@ -156,11 +182,11 @@
                     <option value="paid" @selected($pricing === 'paid')>Paid</option>
                 </select>
             </label>
-        </div>
-        <div class="form-row" id="amountRowEdit" style="{{ $pricing === 'paid' ? '' : 'display:none;' }}">
-            <label>Enter amount
-                <input type="number" name="amount" min="0" step="0.01" value="{{ old('amount', $event->amount) }}">
-            </label>
+            <div class="form-row" id="amountRowEdit" style="{{ $pricing === 'paid' ? '' : 'display:none;' }}">
+                <label>Enter amount
+                    <input type="number" name="amount" min="0" step="0.01" value="{{ old('amount', $event->amount) }}">
+                </label>
+            </div>
         </div>
         <label>Event description (optional)
             <textarea name="description">{{ old('description', $event->description) }}</textarea>
@@ -240,6 +266,59 @@
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
         toggleOtherClubInputEdit();
+
+        const start = document.getElementById('event-edit-start-date');
+        const end = document.getElementById('event-edit-end-date');
+        const container = document.getElementById('attendance-sessions-edit-container');
+
+        function generateEditAttendanceSessions() {
+            if (!start || !end || !container || !start.value || !end.value) {
+                return;
+            }
+            const startDate = new Date(start.value);
+            const endDate = new Date(end.value);
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
+                return;
+            }
+
+            const existing = {};
+            container.querySelectorAll('div[data-attendance-row]').forEach(function(row) {
+                const dateKey = row.getAttribute('data-attendance-row');
+                const input = row.querySelector('input[type=\"number\"]');
+                if (dateKey && input) {
+                    existing[dateKey] = input.value;
+                }
+            });
+
+            container.innerHTML = '';
+
+            let current = new Date(startDate);
+            while (current <= endDate) {
+                const iso = current.toISOString().split('T')[0];
+                const display = iso;
+                const value = existing[iso] || 1;
+
+                const row = document.createElement('div');
+                row.className = 'form-row two-col';
+                row.setAttribute('data-attendance-row', iso);
+                row.style.marginBottom = '8px';
+                row.innerHTML =
+                    '<label>Date' +
+                        '<input type=\"text\" value=\"' + display + '\" readonly style=\"background:#f5f8ff;\">' +
+                    '</label>' +
+                    '<label>Sessions on ' + display +
+                        '<input type=\"number\" name=\"attendance_sessions[' + iso + ']\" min=\"1\" max=\"10\" value=\"' + value + '\" required>' +
+                    '</label>';
+                container.appendChild(row);
+
+                current.setDate(current.getDate() + 1);
+            }
+        }
+
+        if (start) start.addEventListener('change', generateEditAttendanceSessions);
+        if (end) end.addEventListener('change', generateEditAttendanceSessions);
+
+        generateEditAttendanceSessions();
     });
 </script>
 @endsection

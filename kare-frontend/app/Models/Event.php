@@ -21,6 +21,7 @@ class Event extends Model
         'organizer_phone',
         'organizer_department',
         'organizer_designation',
+        'faculty_token',
         'purpose',
         'seating_capacity',
         'facilities_required',

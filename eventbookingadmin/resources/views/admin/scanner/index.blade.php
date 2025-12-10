@@ -155,18 +155,57 @@
             <h3>Registrations</h3>
             <p>{{ $selectedEvent->registrations_count ?? 0 }} / {{ $selectedEvent->capacity }}</p>
         </div>
+        <div class="card">
+            <h3>Attendance Sessions</h3>
+            <p>
+                Today ({{ $today->format('Y-m-d') }}):
+                @if($todaySessions->isEmpty())
+                    No sessions scheduled
+                @else
+                    {{ $todaySessions->count() }} session(s) available
+                @endif
+            </p>
+        </div>
+    </div>
+
+    <!-- Session Selector -->
+    <div class="section-block" style="margin-bottom: 20px; background: #f0f8ff; border: 2px solid #b8d4f0;">
+        <h3 style="margin: 0 0 12px; color: #0a4a8a;">Select Attendance Session (Today Only)</h3>
+        @if($todaySessions->isEmpty())
+            <p style="margin:0; color:#c62828; font-weight:600;">
+                No attendance sessions are scheduled for today. Attendance is blocked for past or future dates.
+            </p>
+        @else
+            <form method="GET" action="{{ route('admin.scanner.index') }}" style="display: flex; align-items: center; gap: 12px;">
+                <input type="hidden" name="event_id" value="{{ $selectedEvent->id }}">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                    Current Session:
+                    <select name="session" onchange="this.form.submit()" style="padding: 8px 12px; border: 2px solid #b8d4f0; border-radius: 6px; font-size: 14px; min-width: 160px;">
+                        @foreach($todaySessions as $session)
+                            <option value="{{ $session->session_number }}" @selected($currentSession == $session->session_number)">
+                                Session {{ $session->session_number }} ({{ $session->session_date->format('Y-m-d') }})
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+                <span style="color: #666; font-size: 13px;">
+                    You are scanning for <strong>Session {{ $currentSession }}</strong> on <strong>{{ $today->format('Y-m-d') }}</strong>
+                </span>
+            </form>
+        @endif
     </div>
 
     @if($result)
         <div class="alert {{ $result['status'] === 'error' ? 'alert-error' : ($result['status'] === 'confirm' ? 'alert-info' : 'alert-success') }}" style="margin-bottom: 20px;">
             {{ $result['message'] }}
-            @if($result['status'] === 'confirm' && !empty($result['student']))
+                @if($result['status'] === 'confirm' && !empty($result['student']))
                 <div style="margin-top: 12px; padding: 12px; background: #f0f8ff; border-radius: 6px; border: 1px solid #b8d4f0;">
                     <h4 style="margin: 0 0 8px; color: #0a4a8a;">Student Details:</h4>
                     <p style="margin: 4px 0;"><strong>Name:</strong> {{ $result['student'] }}</p>
                     <p style="margin: 4px 0;"><strong>Email:</strong> {{ $result['student_email'] ?? '—' }}</p>
                     <p style="margin: 4px 0;"><strong>Roll No:</strong> {{ $result['student_id'] ?? '—' }}</p>
                     <p style="margin: 4px 0;"><strong>Registration ID:</strong> #{{ $result['reg_id'] }}</p>
+                    <p style="margin: 4px 0;"><strong>Session:</strong> Session {{ $result['session_number'] ?? $currentSession }}</p>
                 </div>
                 <form method="POST" action="{{ route('admin.scanner.confirm') }}" style="margin-top: 12px;">
                     @csrf
@@ -190,6 +229,11 @@
     <!-- QR Scanner Section - Two Columns -->
     <div class="section-block">
         <h2>QR Scanner</h2>
+        @if($todaySessions->isEmpty() || !$currentSession)
+            <p style="margin:0; color:#c62828; font-weight:600;">
+                QR scanning is disabled because there is no attendance session scheduled for today.
+            </p>
+        @else
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px;">
             <!-- Left: Upload QR Code -->
             <div style="border: 2px solid #b8d4f0; border-radius: 8px; padding: 16px; background: #fff;">
@@ -200,6 +244,7 @@
                         @csrf
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="event_id" value="{{ $selectedEvent->id }}">
+                        <input type="hidden" name="session_number" value="{{ $currentSession }}">
                         <input type="hidden" name="qr_value" id="qr-value-input">
                         <label style="display: block; margin-bottom: 12px; font-size: 13px; color: #666;">
                             <strong style="display: block; margin-bottom: 6px; color: #333;">Select QR Image</strong>
@@ -221,6 +266,7 @@
                         @csrf
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="event_id" value="{{ $selectedEvent->id }}">
+                        <input type="hidden" name="session_number" value="{{ $currentSession }}">
                         <input type="hidden" name="qr_value" id="camera-qr-value">
                         <button type="submit" id="camera-submit-btn" style="display: none; padding: 10px 20px; background: linear-gradient(135deg, #1E90FF 0%, #0A66C2 100%); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 13px; margin-bottom: 8px;">Verify & Show Details</button>
                     </form>
@@ -229,6 +275,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     <div class="section-block">
@@ -265,6 +312,7 @@
                     <th>Email</th>
                     <th>Roll No</th>
                     <th>Registered At</th>
+                    <th>Sessions Attended</th>
                     <th>Attendance Status</th>
                 </tr>
             </thead>
@@ -276,6 +324,20 @@
                         <td>{{ $student->student_email }}</td>
                         <td>{{ $student->student_id ?? '—' }}</td>
                         <td>{{ optional($student->registered_at)->format('Y-m-d H:i') }}</td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-weight: 600; color: {{ $student->all_sessions_completed ? '#23a96a' : '#666' }};">
+                                    {{ $student->sessions_completed ?? 0 }} / {{ $selectedEvent->attendance_sessions }}
+                                </span>
+                                @if(isset($student->attended_sessions) && count($student->attended_sessions) > 0)
+                                    <small style="color: #666; font-size: 11px;">
+                                        Sessions: {{ implode(', ', $student->attended_sessions) }}
+                                    </small>
+                                @else
+                                    <small style="color: #999; font-size: 11px;">No sessions attended</small>
+                                @endif
+                            </div>
+                        </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="padding: 4px 8px; border-radius: 4px; font-weight: 600; 
@@ -296,7 +358,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">No registrations found for this event.</td>
+                        <td colspan="7">No registrations found for this event.</td>
                     </tr>
                 @endforelse
             </tbody>

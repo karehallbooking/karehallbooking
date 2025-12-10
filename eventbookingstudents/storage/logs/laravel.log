@@ -454,3 +454,66 @@
 [2025-11-27 10:57:51] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
 [2025-11-27 10:57:51] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[7]} 
 [2025-11-27 10:57:51] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-30 14:37:39] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-30 14:37:39] local.INFO: Fetched upcoming registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-30 14:37:39] local.INFO: Fetched history registrations {"student_email":null,"count":0,"registration_ids":[]} 
+[2025-11-30 14:37:42] local.INFO: Dashboard accessed {"student_email":null,"has_session":false} 
+[2025-11-30 14:38:06] local.INFO: Registration created successfully {"registration_id":8,"event_id":8,"student_email":"99220040900@klu.ac.in","qr_code_length":173} 
+[2025-11-30 14:47:06] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 14:47:08] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 14:47:08] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[8]} 
+[2025-11-30 14:47:08] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-30 14:47:10] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 14:47:10] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[8]} 
+[2025-11-30 14:47:10] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-30 14:47:12] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 14:47:12] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[8]} 
+[2025-11-30 14:47:15] local.INFO: Ticket PDF generated successfully {"registration_id":8,"file_path":"C:\\Users\\sande\\Downloads\\KAREHALL\\eventbookingstudents\\storage\\app/registrations/ticket_8.pdf","file_exists":true,"file_size":7633} 
+[2025-11-30 14:56:25] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 14:56:25] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[8]} 
+[2025-11-30 14:56:25] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-30 14:56:27] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 14:56:27] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":1,"registration_ids":[8]} 
+[2025-11-30 14:56:27] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-11-30 15:14:27] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-11-30 15:14:40] local.INFO: Registration created successfully {"registration_id":9,"event_id":10,"student_email":"99220040900@klu.ac.in","qr_code_length":null} 
+[2025-11-30 15:14:48] local.INFO: Creating Razorpay order {"event_id":10,"registration_id":9,"amount":10000,"currency":"INR"} 
+[2025-11-30 15:14:50] local.INFO: Razorpay order created successfully {"order_id":"order_RlztN7T3ONF1y5","amount":10000,"status":"created"} 
+[2025-11-30 15:14:50] local.INFO: Razorpay order created for registration {"registration_id":9,"payment_id":4,"order_id":"order_RlztN7T3ONF1y5","amount":10000} 
+[2025-11-30 15:15:09] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 04:11:15] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 04:11:15] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-01 04:11:15] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-12-01 04:11:18] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 04:11:40] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 04:11:52] local.INFO: Creating Razorpay order {"event_id":10,"registration_id":9,"amount":10000,"currency":"INR"} 
+[2025-12-01 04:11:54] local.INFO: Razorpay order created successfully {"order_id":"order_RmD8EOs6S6YJ6I","amount":10000,"status":"created"} 
+[2025-12-01 04:11:54] local.INFO: Razorpay order created for registration {"registration_id":9,"payment_id":5,"order_id":"order_RmD8EOs6S6YJ6I","amount":10000} 
+[2025-12-01 05:01:39] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:01:39] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-01 05:01:39] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-12-01 05:11:22] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:11:51] local.INFO: Creating Razorpay order {"event_id":10,"registration_id":9,"amount":10000,"currency":"INR"} 
+[2025-12-01 05:11:52] local.INFO: Razorpay order created successfully {"order_id":"order_RmE9ZnQnl63Y0I","amount":10000,"status":"created"} 
+[2025-12-01 05:11:52] local.INFO: Razorpay order created for registration {"registration_id":9,"payment_id":6,"order_id":"order_RmE9ZnQnl63Y0I","amount":10000} 
+[2025-12-01 05:12:25] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:12:34] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:12:43] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:12:43] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-01 05:12:43] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-12-01 05:12:46] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:12:50] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:12:50] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-01 05:12:50] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-12-01 05:12:52] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:12:52] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-01 05:13:04] local.INFO: Dashboard accessed {"student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-01 05:13:04] local.INFO: Fetched upcoming registrations {"student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-01 05:13:04] local.INFO: Fetched history registrations {"student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-12-04 14:46:07] local.INFO: Dashboard accessed {"student_token":"missing","student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-04 14:46:07] local.INFO: Fetched upcoming registrations {"student_token":"missing","student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-04 14:46:07] local.INFO: Fetched history registrations {"student_token":"missing","student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 
+[2025-12-04 14:46:09] local.INFO: Dashboard accessed {"student_token":"missing","student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-04 14:46:14] local.INFO: Dashboard accessed {"student_token":"missing","student_email":"99220040900@klu.ac.in","has_session":true} 
+[2025-12-04 14:46:14] local.INFO: Fetched upcoming registrations {"student_token":"missing","student_email":"99220040900@klu.ac.in","count":2,"registration_ids":[9,8]} 
+[2025-12-04 14:46:14] local.INFO: Fetched history registrations {"student_token":"missing","student_email":"99220040900@klu.ac.in","count":0,"registration_ids":[]} 

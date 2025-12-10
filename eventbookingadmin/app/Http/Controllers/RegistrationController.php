@@ -49,10 +49,14 @@ class RegistrationController extends Controller
             'student_email' => 'required|email|max:255',
             'student_phone' => 'nullable|string|max:20',
             'student_id' => 'nullable|string|max:100',
+            // Note: student_token is NOT included - it should only be set by the system, not manually
         ]);
 
+        // Explicitly exclude student_token from manual admin creation
+        // Token should only come from the college portal integration
         $registration = Registration::create($validated + [
             'registered_at' => now(),
+            'student_token' => null, // Admin-created registrations don't have tokens
         ]);
         $qrCode = QRHelper::generate($registration->id, $registration->event_id, $registration->student_email);
         $registration->update(['qr_code' => $qrCode]);
@@ -82,7 +86,12 @@ class RegistrationController extends Controller
             'student_id' => 'nullable|string|max:100',
             'payment_status' => 'required|in:pending,paid,refunded',
             'attendance_status' => 'required|in:pending,present,absent',
+            // Note: student_token is NOT included - it should not be editable by admin
         ]);
+
+        // Explicitly exclude student_token from update - it's system-controlled
+        // Remove student_token from request if somehow included
+        unset($validated['student_token']);
 
         $originalEventId = $registration->event_id;
         $registration->update($validated);

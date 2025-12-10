@@ -12,6 +12,7 @@ class Registration extends Model
         'student_email',
         'student_phone',
         'student_id',
+        'student_token', // Token from college portal to identify student (read-only for admin)
         'qr_code',
         'payment_status',
         'attendance_status',

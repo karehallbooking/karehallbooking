@@ -18,6 +18,7 @@ Route::prefix('events')->name('admin.events.')->group(function () {
     Route::get('/export/csv', [EventController::class, 'exportCsv'])->name('export.csv');
     Route::get('/create', [EventController::class, 'create'])->name('create');
     Route::post('/', [EventController::class, 'store'])->name('store');
+    Route::post('/{id}/complete', [EventController::class, 'complete'])->name('complete');
     Route::get('/{id}/brochure/download', [EventController::class, 'downloadBrochure'])->name('brochure.download');
     Route::get('/{id}/attachment/download', [EventController::class, 'downloadAttachment'])->name('attachment.download');
     Route::get('/{id}/edit', [EventController::class, 'edit'])->name('edit');
@@ -81,6 +82,9 @@ Route::prefix('reports')->name('admin.reports.')->group(function () {
     Route::get('/monthly', [ReportController::class, 'monthlyReport'])->name('monthly');
     Route::get('/event/{event}', [ReportController::class, 'eventReport'])->name('event');
     Route::get('/print-summary', [ReportController::class, 'printSummary'])->name('summary');
+    Route::get('/events/excel', [ReportController::class, 'eventsExcel'])->name('events.excel');
+    Route::get('/event/{event}/zip', [ReportController::class, 'eventZip'])->name('event.zip');
+    Route::get('/event/{event}/file/{field}', [ReportController::class, 'downloadEventFile'])->name('event.file');
 });
 
 Route::prefix('settings')->name('admin.settings.')->group(function () {

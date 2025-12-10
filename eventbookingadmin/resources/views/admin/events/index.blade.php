@@ -190,18 +190,18 @@
                 <label>Event Club
                     <select name="event_club" id="event_club" required onchange="toggleOtherClubInput()">
                         <option value="">-- Select Club --</option>
-                        <option value="Technical Club" @selected(old('event_club') === 'Technical Club')>Technical Club</option>
-                        <option value="Cultural Club" @selected(old('event_club') === 'Cultural Club')>Cultural Club</option>
-                        <option value="Sports Club" @selected(old('event_club') === 'Sports Club')>Sports Club</option>
-                        <option value="Literary Club" @selected(old('event_club') === 'Literary Club')>Literary Club</option>
-                        <option value="Music Club" @selected(old('event_club') === 'Music Club')>Music Club</option>
-                        <option value="Dance Club" @selected(old('event_club') === 'Dance Club')>Dance Club</option>
+                        <option value="Fine Arts" @selected(old('event_club') === 'Fine Arts')>Fine Arts</option>
+                        <option value="Green Army" @selected(old('event_club') === 'Green Army')>Green Army</option>
+                        <option value="Nature Club" @selected(old('event_club') === 'Nature Club')>Nature Club</option>
+                        <option value="NCC" @selected(old('event_club') === 'NCC')>NCC</option>
+                        <option value="NSS" @selected(old('event_club') === 'NSS')>NSS</option>
                         <option value="Photography Club" @selected(old('event_club') === 'Photography Club')>Photography Club</option>
-                        <option value="NSS Club" @selected(old('event_club') === 'NSS Club')>NSS Club</option>
-                        <option value="NCC Club" @selected(old('event_club') === 'NCC Club')>NCC Club</option>
-                        <option value="Robotics Club" @selected(old('event_club') === 'Robotics Club')>Robotics Club</option>
-                        <option value="Eco Club" @selected(old('event_club') === 'Eco Club')>Eco Club</option>
-                        <option value="Entrepreneurship Club" @selected(old('event_club') === 'Entrepreneurship Club')>Entrepreneurship Club</option>
+                        <option value="Sherlock Holmes Club" @selected(old('event_club') === 'Sherlock Holmes Club')>Sherlock Holmes Club</option>
+                        <option value="Sports" @selected(old('event_club') === 'Sports')>Sports</option>
+                        <option value="Tamil Mandram" @selected(old('event_club') === 'Tamil Mandram')>Tamil Mandram</option>
+                        <option value="Vishaka Club" @selected(old('event_club') === 'Vishaka Club')>Vishaka Club</option>
+                        <option value="YRC" @selected(old('event_club') === 'YRC')>YRC</option>
+                        <option value="YUVA Tourism" @selected(old('event_club') === 'YUVA Tourism')>YUVA Tourism</option>
                         <option value="Other" @selected(old('event_club') === 'Other')>Other</option>
                     </select>
                 </label>
@@ -256,7 +256,6 @@
                                 <option value="{{ $time }}" @selected(old('start_time') === $time)>{{ $time }}</option>
                             @endforeach
                         </select>
-                        <span class="time-select-hint">Scroll to see all 24 hours</span>
                     </label>
                     <label class="time-select-group">
                         <span class="icon">🕐</span>To time (24-hour format)
@@ -266,7 +265,6 @@
                                 <option value="{{ $time }}" @selected(old('end_time') === $time)>{{ $time }}</option>
                             @endforeach
                         </select>
-                        <span class="time-select-hint">View five slots at a time and scroll</span>
                     </label>
                 </div>
             </div>
@@ -277,17 +275,41 @@
                     <label>How many seats available
                         <input type="number" name="capacity" min="1" value="{{ old('capacity') }}" required placeholder="Enter number of seats">
                     </label>
+                </div>
+                <div class="two-col">
                     <label>Paid or Free
                         <select name="pricing_type" id="pricingType" required>
                             <option value="free" @selected(old('pricing_type', 'free') === 'free')>Free</option>
                             <option value="paid" @selected(old('pricing_type') === 'paid')>Paid</option>
                         </select>
                     </label>
+                    <div class="form-row" id="amountRow" style="{{ old('pricing_type', 'free') === 'paid' ? '' : 'display:none;' }}">
+                        <label>Enter amount
+                            <input type="number" name="amount" step="0.01" min="0" value="{{ old('amount') }}" placeholder="0.00">
+                        </label>
+                    </div>
                 </div>
-                <div class="form-row" id="amountRow" style="{{ old('pricing_type', 'free') === 'paid' ? '' : 'display:none;' }}">
-                    <label>Enter amount
-                        <input type="number" name="amount" step="0.01" min="0" value="{{ old('amount') }}" placeholder="0.00">
-                    </label>
+            </div>
+
+            <div class="form-section">
+                <h3>Attendance Sessions (Date-wise)</h3>
+                <p style="font-size: 13px; color:#4a5d78; margin-top:0;">
+                    After selecting <strong>From date</strong> and <strong>To date</strong>, date-wise session fields will appear here.
+                    Please enter how many times attendance will be taken on each date.
+                </p>
+                <div id="attendance-sessions-container">
+                    @if(old('attendance_sessions'))
+                        @foreach(old('attendance_sessions') as $date => $count)
+                            <div class="two-col" data-attendance-row="{{ $date }}" style="margin-bottom:8px;">
+                                <label>Date
+                                    <input type="text" value="{{ $date }}" readonly style="background:#f5f8ff;">
+                                </label>
+                                <label>Sessions on {{ $date }}
+                                    <input type="number" name="attendance_sessions[{{ $date }}]" min="1" max="10" value="{{ $count }}" required>
+                                </label>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
 
@@ -427,6 +449,70 @@
             }
             return true;
         }
+
+        // -------- Date-wise attendance sessions ----------
+        function generateAttendanceSessions() {
+            const startInput = document.getElementById('event-start-date');
+            const endInput = document.getElementById('event-end-date');
+            const container = document.getElementById('attendance-sessions-container');
+            if (!startInput || !endInput || !container || !startInput.value || !endInput.value) {
+                return;
+            }
+
+            const startDate = new Date(startInput.value);
+            const endDate = new Date(endInput.value);
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
+                return;
+            }
+
+            // Preserve existing values if possible
+            const existing = {};
+            container.querySelectorAll('div[data-attendance-row]').forEach(function(row) {
+                const dateKey = row.getAttribute('data-attendance-row');
+                const input = row.querySelector('input[type=\"number\"]');
+                if (dateKey && input) {
+                    existing[dateKey] = input.value;
+                }
+            });
+
+            container.innerHTML = '';
+
+            let current = new Date(startDate);
+            while (current <= endDate) {
+                const iso = current.toISOString().split('T')[0];
+                const display = iso;
+                const value = existing[iso] || 1;
+
+                const row = document.createElement('div');
+                row.className = 'two-col';
+                row.setAttribute('data-attendance-row', iso);
+                row.style.marginBottom = '8px';
+                row.innerHTML =
+                    '<label>Date' +
+                        '<input type=\"text\" value=\"' + display + '\" readonly style=\"background:#f5f8ff;\">' +
+                    '</label>' +
+                    '<label>Sessions on ' + display +
+                        '<input type=\"number\" name=\"attendance_sessions[' + iso + ']\" min=\"1\" max=\"10\" value=\"' + value + '\" required>' +
+                    '</label>';
+                container.appendChild(row);
+
+                current.setDate(current.getDate() + 1);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const start = document.getElementById('event-start-date');
+            const end = document.getElementById('event-end-date');
+            if (start) {
+                start.addEventListener('change', generateAttendanceSessions);
+            }
+            if (end) {
+                end.addEventListener('change', generateAttendanceSessions);
+            }
+
+            // Initial generation if values already present (e.g., edit/validation error)
+            generateAttendanceSessions();
+        });
     </script>
 @elseif($view === 'list')
     <a class="back-link" href="{{ route('admin.events.index') }}">Back to Events</a>
@@ -460,12 +546,31 @@
                         <td>{{ $event->registrations_count ?? $event->registrations()->where('payment_status', 'paid')->count() }}</td>
                         <td>{{ ucfirst($event->status) }}</td>
                         <td class="actions">
-                            <a href="{{ route('admin.events.edit', $event->id) }}">Edit</a>
-                            <form method="POST" action="{{ route('admin.events.destroy', $event->id) }}">
+                            <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-outline btn-sm">Edit</a>
+                            <form method="POST"
+                                  action="{{ route('admin.events.destroy', $event->id) }}"
+                                  class="delete-event-form"
+                                  data-event-title="{{ $event->title }}"
+                                  style="display:inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Delete this event?')">Delete</button>
+                                <button type="button" class="btn btn-danger btn-sm">Delete</button>
                             </form>
+                            @if($event->status !== 'completed')
+                                <button type="button"
+                                        class="btn btn-primary btn-sm"
+                                        onclick="openCompleteEventModal({{ $event->id }}, '{{ addslashes($event->title) }}')">
+                                    Mark Event Complete
+                                </button>
+                            @endif
+                            @php
+                                $isPast = $event->end_date && $event->end_date->lt(\Carbon\Carbon::today());
+                            @endphp
+                            @if($isPast && $event->status !== 'completed')
+                                <div style="margin-top:6px; font-size:11px; color:#b45309; font-weight:600;">
+                                    This event has ended. Please upload required files and mark as complete.
+                                </div>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -476,6 +581,86 @@
             </tbody>
         </table>
         {{ $events->links('pagination::simple-default') }}
+    </div>
+    
+    {{-- Delete Event Modal --}}
+    <div id="delete-event-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#ffffff; border-radius:14px; max-width:420px; width:92%; padding:24px 22px 18px; box-shadow:0 18px 45px rgba(15, 82, 186, 0.4); position:relative;">
+            <h3 style="margin:0 0 10px; font-size:20px; color:#0a4a8a;">Delete Event</h3>
+            <p id="delete-event-modal-body" style="margin:0 0 18px; font-size:14px; color:#1a2740; font-weight:600;">
+                Are you sure you want to delete this event?
+            </p>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:4px;">
+                <button type="button"
+                        id="delete-event-cancel"
+                        style="padding:8px 18px; border-radius:999px; border:1px solid #c5d9f0; background:#f5f8ff; color:#0a4a8a; font-weight:600; cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="button"
+                        id="delete-event-confirm"
+                        style="padding:9px 22px; border-radius:999px; border:none; background:#0b63ce; color:#ffffff; font-weight:700; cursor:pointer; box-shadow:0 4px 10px rgba(11, 99, 206, 0.35);">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Complete Event Modal --}}
+    <div id="complete-event-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:12px; max-width:720px; width:95%; padding:24px; box-shadow:0 12px 40px rgba(15, 82, 186, 0.35); position:relative;">
+            <h3 style="margin-top:0; margin-bottom:8px; font-size:20px; color:#0a4a8a;">Mark Event Complete</h3>
+            <p id="complete-event-modal-subtitle" style="margin-top:0; margin-bottom:16px; font-size:13px; color:#445668;">
+                Upload all mandatory post-event documents to close this event.
+            </p>
+            <form id="complete-event-form" method="POST" action="" enctype="multipart/form-data">
+                @csrf
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Event Form (required)
+                        <input type="file" name="completion_event_form" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Circular (required)
+                        <input type="file" name="completion_circular" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Event Brochure (required)
+                        <input type="file" name="completion_brochure" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Report (required)
+                        <input type="file" name="completion_report" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Attendance (required)
+                        <input type="file" name="completion_attendance" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Feedback (required)
+                        <input type="file" name="completion_feedback" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Sample Certificate (required)
+                        <input type="file" name="completion_sample_certificate" required style="margin-top:6px;">
+                    </label>
+                    <label style="font-size:13px; font-weight:600; color:#1a3a5c;">
+                        Event Images / Combined File (required)
+                        <input type="file" name="completion_images[]" multiple required style="margin-top:6px;">
+                        <small style="font-size:11px; color:#5b6a7d; display:block; margin-top:4px;">
+                            You can upload individual images (jpg, jpeg, png) or a single combined file (pdf, doc, docx) that contains all images.
+                        </small>
+                    </label>
+                </div>
+                <div style="margin-top:18px; display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" onclick="closeCompleteEventModal()" style="padding:8px 16px; border-radius:6px; border:1px solid #c5d9f0; background:#f5f8ff; cursor:pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" style="padding:9px 20px; border-radius:6px; border:none; background:#0b63ce; color:#fff; font-weight:600; cursor:pointer;">
+                        Upload & Close Event
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 @else
     @if(!$view)
@@ -499,3 +684,91 @@
     @endif
 @endif
 @endsection
+
+@push('scripts')
+<script>
+    // ---------- Complete Event Modal ----------
+    function openCompleteEventModal(eventId, title) {
+        var modal = document.getElementById('complete-event-modal');
+        var form = document.getElementById('complete-event-form');
+        var subtitle = document.getElementById('complete-event-modal-subtitle');
+        if (modal && form) {
+            form.action = "{{ url('events') }}/" + eventId + "/complete";
+            if (subtitle) {
+                subtitle.textContent = 'Upload all mandatory documents to close "' + title + '" as completed.';
+            }
+            modal.style.display = 'flex';
+        }
+    }
+
+    function closeCompleteEventModal() {
+        var modal = document.getElementById('complete-event-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // ---------- Delete Event Modal ----------
+    (function () {
+        var activeDeleteForm = null;
+        var modal = document.getElementById('delete-event-modal');
+        var bodyEl = document.getElementById('delete-event-modal-body');
+        var btnCancel = document.getElementById('delete-event-cancel');
+        var btnConfirm = document.getElementById('delete-event-confirm');
+
+        function openDeleteModal(form) {
+            activeDeleteForm = form;
+            if (bodyEl && form && form.dataset.eventTitle) {
+                bodyEl.textContent =
+                    'Are you sure you want to delete the event \"' + form.dataset.eventTitle + '\"?';
+            }
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeDeleteModal() {
+            activeDeleteForm = null;
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteForms = document.querySelectorAll('.delete-event-form');
+            deleteForms.forEach(function (form) {
+                var btn = form.querySelector('button[type=\"button\"]');
+                if (btn) {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        openDeleteModal(form);
+                    });
+                }
+            });
+
+            if (btnCancel) {
+                btnCancel.addEventListener('click', function () {
+                    closeDeleteModal();
+                });
+            }
+
+            if (btnConfirm) {
+                btnConfirm.addEventListener('click', function () {
+                    if (activeDeleteForm) {
+                        activeDeleteForm.submit();
+                    }
+                    closeDeleteModal();
+                });
+            }
+
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        closeDeleteModal();
+                    }
+                });
+            }
+        });
+    })();
+</script>
+@endpush

@@ -5,18 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Payment;
-use App\Services\RazorpayService;
+use App\Helpers\StudentTokenHelper;
+use App\Services\BillDeskService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EventRegistrationController extends Controller
 {
-    protected $razorpayService;
+    protected $billdeskService;
 
-    public function __construct(RazorpayService $razorpayService)
+    public function __construct(BillDeskService $billdeskService)
     {
-        $this->razorpayService = $razorpayService;
+        $this->billdeskService = $billdeskService;
     }
 
     /**
@@ -42,9 +43,17 @@ class EventRegistrationController extends Controller
                 ->with('error', 'Registration for this event has closed.');
         }
 
-        // Check if registration already exists
+        // Get student token from header/session
+        $studentToken = StudentTokenHelper::getToken($request);
+        
+        // Check if registration already exists - check by token if available, otherwise by email
         $registration = null;
-        if ($studentEmail) {
+        if ($studentToken) {
+            $registration = Registration::with('ticket')
+                ->where('event_id', $event->id)
+                ->where('student_token', $studentToken)
+                ->first();
+        } elseif ($studentEmail) {
             $registration = Registration::with('ticket')
                 ->where('event_id', $event->id)
                 ->where('student_email', $studentEmail)
@@ -75,7 +84,7 @@ class EventRegistrationController extends Controller
     }
 
     /**
-     * Create Razorpay order for event registration
+     * Initiate BillDesk payment for event registration
      */
     public function createOrderForEvent(Request $request, Event $event)
     {
@@ -102,21 +111,44 @@ class EventRegistrationController extends Controller
             }
 
             return DB::transaction(function () use ($event, $studentEmail, $studentName, $studentPhone, $studentRoll, $request) {
-                // Find or create registration
-                $registration = Registration::firstOrCreate(
-                    [
-                        'event_id' => $event->id,
-                        'student_email' => $studentEmail,
-                    ],
-                    [
-                        'student_name' => $studentName,
-                        'student_phone' => $studentPhone,
-                        'student_id' => $studentRoll,
-                        'payment_status' => 'pending',
-                        'attendance_status' => 'absent',
-                        'registered_at' => now(),
-                    ]
-                );
+                // Get student token from header/session
+                $studentToken = StudentTokenHelper::getToken($request);
+                
+                // Find or create registration - use token if available, otherwise email
+                if ($studentToken) {
+                    // Primary method: use token + event_id to prevent duplicates
+                    $registration = Registration::firstOrCreate(
+                        [
+                            'event_id' => $event->id,
+                            'student_token' => $studentToken,
+                        ],
+                        [
+                            'student_name' => $studentName,
+                            'student_email' => $studentEmail,
+                            'student_phone' => $studentPhone,
+                            'student_id' => $studentRoll,
+                            'payment_status' => 'pending',
+                            'attendance_status' => 'absent',
+                            'registered_at' => now(),
+                        ]
+                    );
+                } else {
+                    // Fallback: use email (backward compatibility)
+                    $registration = Registration::firstOrCreate(
+                        [
+                            'event_id' => $event->id,
+                            'student_email' => $studentEmail,
+                        ],
+                        [
+                            'student_name' => $studentName,
+                            'student_phone' => $studentPhone,
+                            'student_id' => $studentRoll,
+                            'payment_status' => 'pending',
+                            'attendance_status' => 'absent',
+                            'registered_at' => now(),
+                        ]
+                    );
+                }
 
                 // Check if already has a paid payment (idempotent check)
                 $existingPayment = Payment::where('registration_id', $registration->id)
@@ -138,48 +170,43 @@ class EventRegistrationController extends Controller
                     ]);
                 }
 
-                // Create Razorpay order
-                $order = $this->razorpayService->createOrder($studentEmail, $event, $registration);
+                // Build BillDesk payment request
+                $order = $this->billdeskService->initiatePayment($event, $registration, $studentEmail, $studentPhone);
 
                 // Create or update payment record
                 $payment = Payment::updateOrCreate(
                     [
                         'registration_id' => $registration->id,
-                        'razorpay_order_id' => $order['id'],
+                        'razorpay_order_id' => $order['order_id'], // reuse column for gateway order id
                     ],
                     [
                         'event_id' => $event->id,
-                        'gateway' => 'razorpay',
-                        'amount' => $order['amount'] / 100, // Convert from paise to rupees
-                        'currency' => $order['currency'],
+                        'gateway' => 'billdesk',
+                        'amount' => $event->amount,
+                        'currency' => 'INR',
                         'status' => 'pending',
                         'meta' => $order,
                     ]
                 );
 
-                Log::info('Razorpay order created for registration', [
+                Log::info('BillDesk order created for registration', [
                     'registration_id' => $registration->id,
                     'payment_id' => $payment->id,
-                    'order_id' => $order['id'],
-                    'amount' => $order['amount'],
+                    'order_id' => $order['order_id'],
+                    'amount' => $event->amount,
                 ]);
 
-                // Return response with Razorpay checkout data
+                // Return response with BillDesk form data
                 return response()->json([
                     'success' => true,
-                    'razorpay_key' => env('RAZORPAY_KEY_ID'),
-                    'order_id' => $order['id'],
-                    'amount' => $order['amount'],
-                    'currency' => $order['currency'],
-                    'student_name' => $studentName,
-                    'student_email' => $studentEmail,
-                    'student_phone' => $studentPhone ?? '',
-                    'event_name' => $event->title,
-                    'registration_id' => $registration->id,
+                    'order_id' => $order['order_id'],
+                    'endpoint' => $order['endpoint'],
+                    'fields' => $order['fields'],
+                    'redirect_message' => 'Redirecting to payment gateway...',
                 ]);
             });
         } catch (\Exception $e) {
-            Log::error('Failed to create Razorpay order', [
+            Log::error('Failed to create BillDesk order', [
                 'event_id' => $event->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

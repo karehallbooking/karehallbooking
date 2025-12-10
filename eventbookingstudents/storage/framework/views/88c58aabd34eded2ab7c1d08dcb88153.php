@@ -94,9 +94,9 @@
                             <?php endif; ?>
                         </p>
                         <?php
+                            // For students: show only brochure, approval/attachment is admin-only
                             $pdfCount = 0;
                             if($event->brochure_path) $pdfCount++;
-                            if($event->attachment_path) $pdfCount++;
                         ?>
                         <?php if($pdfCount > 0): ?>
                             <p style="margin-top: 12px; margin-bottom: 8px;">
@@ -105,9 +105,6 @@
                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 <?php if($event->brochure_path): ?>
                                     <a href="#" onclick="event.stopPropagation(); openPdfModal('<?php echo e(route('student.events.brochure', $event->id)); ?>', 'Event Brochure'); return false;" class="pdf-link-simple">📑 View Brochure</a>
-                                <?php endif; ?>
-                                <?php if($event->attachment_path): ?>
-                                    <a href="#" onclick="event.stopPropagation(); openPdfModal('<?php echo e(route('student.events.attachment', $event->id)); ?>', 'Event Attachment'); return false;" class="pdf-link-simple">📑 View Attachment</a>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>

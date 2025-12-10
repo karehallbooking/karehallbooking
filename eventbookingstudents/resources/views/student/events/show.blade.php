@@ -89,9 +89,6 @@
                 @if($event->brochure_path)
                     <a href="#" onclick="openPdfModal('{{ route('student.events.brochure', $event->id) }}', 'Event Brochure'); return false;" class="pdf-link-simple">📑 View Brochure</a>
                 @endif
-                @if($event->attachment_path)
-                    <a href="#" onclick="openPdfModal('{{ route('student.events.attachment', $event->id) }}', 'Event Attachment'); return false;" class="pdf-link-simple">📑 View Attachment</a>
-                @endif
             </div>
         </div>
     @endif

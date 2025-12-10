@@ -233,6 +233,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .alert {
             border: 1px solid #0c5fd1;
@@ -313,6 +314,60 @@
             font-size: 16px;
             font-weight: bold;
             line-height: 1;
+        }
+        /* Generic button styles for tables & forms */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+            white-space: nowrap;
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0d63d8 0%, #0847a8 100%);
+            border-color: #0d63d8;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(13, 99, 216, 0.35);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0847a8 0%, #06347c 100%);
+            box-shadow: 0 3px 10px rgba(8, 71, 168, 0.45);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: #f7f9ff;
+            border-color: #c4d3f4;
+            color: #124191;
+        }
+        .btn-outline:hover {
+            background: #e5edff;
+            border-color: #0d63d8;
+            color: #0b3a7a;
+            box-shadow: 0 2px 6px rgba(12, 60, 138, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: #f44336;
+            border-color: #f44336;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(244, 67, 54, 0.35);
+        }
+        .btn-danger:hover {
+            background: #d32f2f;
+            border-color: #d32f2f;
+            box-shadow: 0 3px 10px rgba(211, 47, 47, 0.45);
+            transform: translateY(-1px);
         }
         button,
         .actions a,
@@ -434,6 +489,8 @@
             });
         });
     </script>
+
+    @stack('scripts')
 </body>
 </html>
 

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Helpers\QRHelper;
 use App\Models\AttendanceLog;
+use App\Models\AttendanceSession;
 use App\Models\Event;
 use App\Models\Registration;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,20 +20,49 @@ class QRScannerController extends Controller
         $selectedEvent = null;
         $students = collect();
         $result = session('scanner_result');
+        $currentSession = $request->has('session') ? (int) $request->get('session') : null;
+        $today = Carbon::today();
+        $todaySessions = collect();
 
         if ($selectedEventId) {
-            $selectedEvent = Event::findOrFail($selectedEventId);
+            $selectedEvent = Event::with('attendanceSessions')->findOrFail($selectedEventId);
+
+            // Sessions allowed only on today's date
+            $todaySessions = $selectedEvent->attendanceSessions()
+                ->whereDate('session_date', $today->toDateString())
+                ->orderBy('session_number')
+                ->get();
+
+            $validSessionNumbers = $todaySessions->pluck('session_number')->all();
+
+            if (empty($validSessionNumbers)) {
+                $currentSession = null;
+            } else {
+                if (!$currentSession || !in_array($currentSession, $validSessionNumbers, true)) {
+                    $currentSession = (int) $validSessionNumbers[0];
+                }
+            }
             
-            // Get present and absent students for this event only
-            $students = Registration::with('event')
+            // Get students with their session attendance details
+            $students = Registration::with(['event', 'attendanceLogs' => function($query) use ($selectedEventId) {
+                $query->where('event_id', $selectedEventId)
+                      ->where('is_revoked', false);
+            }])
                 ->where('event_id', $selectedEventId)
                 ->select('id', 'student_name', 'student_email', 'student_id', 'attendance_status', 'registered_at')
                 ->orderBy('attendance_status', 'desc')
                 ->orderBy('student_name')
-                ->get();
+                ->get()
+                ->map(function($student) use ($selectedEvent) {
+                    $attendedSessions = $student->attendanceLogs->pluck('session_number')->unique()->sort()->values()->toArray();
+                    $student->attended_sessions = $attendedSessions;
+                    $student->sessions_completed = count($attendedSessions);
+                    $student->all_sessions_completed = count($attendedSessions) === $selectedEvent->attendance_sessions;
+                    return $student;
+                });
         }
 
-        return view('admin.scanner.index', compact('events', 'selectedEvent', 'students', 'result', 'selectedEventId'));
+        return view('admin.scanner.index', compact('events', 'selectedEvent', 'students', 'result', 'selectedEventId', 'currentSession', 'todaySessions', 'today'));
     }
 
     public function scan(Request $request)
@@ -39,9 +70,26 @@ class QRScannerController extends Controller
         $data = $request->validate([
             'event_id' => 'required|exists:events,id',
             'qr_value' => 'required|string',
+            'session_number' => 'required|integer|min:1',
         ]);
 
         $event = Event::findOrFail($data['event_id']);
+        $sessionNumber = (int) $data['session_number'];
+
+        // Enforce date-wise attendance: only allow if today's date matches session_date
+        $today = Carbon::today();
+        $session = AttendanceSession::where('event_id', $event->id)
+            ->where('session_number', $sessionNumber)
+            ->whereDate('session_date', $today->toDateString())
+            ->first();
+
+        if (!$session) {
+            return redirect()->route('admin.scanner.index', ['event_id' => $event->id])
+                ->with('scanner_result', [
+                    'status' => 'error',
+                    'message' => 'Attendance is allowed only on the scheduled event date.',
+                ]);
+        }
         
         // Trim whitespace from QR value
         $qrValue = trim($data['qr_value']);
@@ -164,6 +212,21 @@ class QRScannerController extends Controller
                 ]);
         }
 
+        // Check if student has already scanned in this session
+        $existingLog = AttendanceLog::where('registration_id', $registration->id)
+            ->where('event_id', $event->id)
+            ->where('session_number', $sessionNumber)
+            ->where('is_revoked', false)
+            ->first();
+
+        if ($existingLog) {
+            return redirect()->route('admin.scanner.index', ['event_id' => $event->id])
+                ->with('scanner_result', [
+                    'status' => 'error',
+                    'message' => $registration->student_name . ' has already been marked present for Session ' . $sessionNumber . '. Each student can only scan once per session.',
+                ]);
+        }
+
         // Store student details in session for confirmation
         $request->session()->put('scanner_pending_registration', [
             'registration_id' => $registration->id,
@@ -171,17 +234,21 @@ class QRScannerController extends Controller
             'student_email' => $registration->student_email,
             'student_id' => $registration->student_id,
             'event_id' => $event->id,
+            'session_number' => $sessionNumber,
+            'session_id' => $session->id,
+            'session_date' => $session->session_date->toDateString(),
             'qr_value' => $data['qr_value'],
         ]);
 
-        return redirect()->route('admin.scanner.index', ['event_id' => $event->id])
+        return redirect()->route('admin.scanner.index', ['event_id' => $event->id, 'session' => $sessionNumber])
             ->with('scanner_result', [
                 'status' => 'confirm',
-                'message' => 'QR code verified. Please confirm to mark attendance.',
+                'message' => 'QR code verified. Please confirm to mark attendance for Session ' . $sessionNumber . '.',
                 'student' => $registration->student_name,
                 'reg_id' => $registration->id,
                 'student_email' => $registration->student_email,
                 'student_id' => $registration->student_id,
+                'session_number' => $sessionNumber,
             ]);
     }
 
@@ -199,29 +266,146 @@ class QRScannerController extends Controller
 
         $registration = Registration::with('event')->findOrFail($pending['registration_id']);
         $event = Event::findOrFail($pending['event_id']);
+        $sessionModel = AttendanceSession::findOrFail($pending['session_id'] ?? 0);
+        
+        // Ensure we have the latest event data
+        $event->refresh();
 
-        $log = DB::transaction(function () use ($registration, $request) {
-            $registration->update(['attendance_status' => 'present']);
+        $sessionNumber = (int) $pending['session_number'];
 
-            return AttendanceLog::create([
-                'registration_id' => $registration->id,
-                'event_id' => $registration->event_id,
-                'scanned_at' => now(),
-                'scanner_ip' => $request->ip(),
-                'notes' => 'QR verified via admin panel',
+        // Enforce date-wise rule again at confirmation time
+        $today = Carbon::today();
+        if (!$sessionModel || !$today->isSameDay($sessionModel->session_date)) {
+            return redirect()->route('admin.scanner.index', ['event_id' => $event->id])
+                ->with('scanner_result', [
+                    'status' => 'error',
+                    'message' => 'Attendance is allowed only on the scheduled event date.',
+                ]);
+        }
+
+        $log = DB::transaction(function () use ($registration, $request, $sessionNumber, $event, $sessionModel, $today) {
+            // Create attendance log for this session
+            $attendanceLog = AttendanceLog::create([
+                'registration_id'  => $registration->id,
+                'event_id'         => $registration->event_id,
+                'session_id'       => $sessionModel->id,
+                'session_number'   => $sessionNumber,
+                'attendance_date'  => $today->toDateString(),
+                'scanned_at'       => now(),
+                'scanner_ip'       => $request->ip(),
+                'notes'            => 'QR verified via admin panel - Session ' . $sessionNumber,
             ]);
+
+            // Refresh event to get latest attendance_sessions value
+            $event->refresh();
+            
+            // Get required sessions count (default to 1 if null)
+            $requiredSessionsCount = (int) ($event->attendance_sessions ?? 1);
+            
+            // Check if student has attended all required sessions
+            // Get all unique session numbers for this registration (including the one just created)
+            $attendedSessions = AttendanceLog::where('registration_id', $registration->id)
+                ->where('event_id', $event->id)
+                ->where('is_revoked', false)
+                ->pluck('session_number')
+                ->unique()
+                ->map(function($session) {
+                    return (int) $session; // Ensure integer type
+                })
+                ->sort()
+                ->values()
+                ->toArray();
+
+            $requiredSessions = range(1, $requiredSessionsCount);
+            
+            // Check if all required sessions are attended
+            // Method 1: Count check
+            $countMatch = count($attendedSessions) === $requiredSessionsCount;
+            
+            // Method 2: Verify all required session numbers are present
+            $allRequiredPresent = true;
+            if ($requiredSessionsCount > 0) {
+                for ($i = 1; $i <= $requiredSessionsCount; $i++) {
+                    if (!in_array($i, $attendedSessions, true)) {
+                        $allRequiredPresent = false;
+                        break;
+                    }
+                }
+            }
+            
+            $allSessionsAttended = $countMatch && $allRequiredPresent && $requiredSessionsCount > 0;
+
+            \Log::info('Checking session attendance', [
+                'registration_id' => $registration->id,
+                'event_id' => $event->id,
+                'event_attendance_sessions_raw' => $event->attendance_sessions,
+                'attendance_sessions' => $requiredSessionsCount,
+                'attended_sessions' => $attendedSessions,
+                'required_sessions' => $requiredSessions,
+                'count_match' => $countMatch,
+                'all_required_present' => $allRequiredPresent,
+                'all_sessions_attended' => $allSessionsAttended,
+            ]);
+
+            // Update attendance status: 'present' only if all sessions are attended
+            if ($allSessionsAttended) {
+                $registration->attendance_status = 'present';
+                $registration->save();
+                \Log::info('Attendance status updated to present', [
+                    'registration_id' => $registration->id,
+                    'attended_sessions' => $attendedSessions,
+                    'required_sessions' => $requiredSessions,
+                ]);
+            } else {
+                // Keep as 'pending' until all sessions are completed
+                $registration->attendance_status = 'pending';
+                $registration->save();
+                \Log::info('Attendance status kept as pending', [
+                    'registration_id' => $registration->id,
+                    'attended_sessions' => $attendedSessions,
+                    'required_sessions' => $requiredSessions,
+                    'missing_sessions' => array_diff($requiredSessions, $attendedSessions),
+                ]);
+            }
+
+            // Refresh registration to get updated status
+            $registration->refresh();
+
+            return $attendanceLog;
         });
+        
+        // Refresh registration after transaction
+        $registration->refresh();
 
         $request->session()->forget('scanner_pending_registration');
 
-        return redirect()->route('admin.scanner.index', ['event_id' => $event->id])
+        // Get session attendance summary
+        $attendedSessions = AttendanceLog::where('registration_id', $registration->id)
+            ->where('event_id', $event->id)
+            ->where('is_revoked', false)
+            ->distinct()
+            ->pluck('session_number')
+            ->sort()
+            ->values()
+            ->toArray();
+
+        $sessionsMessage = 'Session ' . $sessionNumber . ' marked. ';
+        if (count($attendedSessions) < $event->attendance_sessions) {
+            $remaining = $event->attendance_sessions - count($attendedSessions);
+            $sessionsMessage .= $remaining . ' session(s) remaining.';
+        } else {
+            $sessionsMessage .= 'All sessions completed!';
+        }
+
+        return redirect()->route('admin.scanner.index', ['event_id' => $event->id, 'session' => $sessionNumber])
             ->with('scanner_result', [
                 'status' => 'success',
-                'message' => 'Attendance marked for ' . $registration->student_name,
+                'message' => 'Attendance marked for ' . $registration->student_name . '. ' . $sessionsMessage,
                 'student' => $registration->student_name,
                 'reg_id' => $registration->id,
                 'time' => now()->format('Y-m-d H:i:s'),
                 'log_id' => $log?->id,
+                'session_number' => $sessionNumber,
             ]);
     }
 

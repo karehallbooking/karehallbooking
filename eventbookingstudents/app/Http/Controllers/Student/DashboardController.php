@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\StudentTokenHelper;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Certificate;
@@ -16,14 +17,17 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // For now, we'll use a session-based student identifier
-        // In production, this would come from authentication
+        // Get student token from header/session (college portal integration)
+        $studentToken = StudentTokenHelper::getToken($request);
+        
+        // Fallback: For backward compatibility, still use email-based session if no token
+        // This allows existing sessions to continue working until portal integration is complete
         $studentEmail = $request->session()->get('student_email');
         $studentName = $request->session()->get('student_name');
         $studentRoll = $request->session()->get('student_roll');
         
-        // If no session, try to get from latest registration
-        if (!$studentEmail) {
+        // If no token and no session, try to get from latest registration (backward compatibility)
+        if (!$studentToken && !$studentEmail) {
             $latestReg = Registration::orderBy('registered_at', 'desc')->first();
             if ($latestReg) {
                 $studentEmail = $latestReg->student_email;
@@ -37,6 +41,7 @@ class DashboardController extends Controller
         }
         
         \Log::info('Dashboard accessed', [
+            'student_token' => $studentToken ? 'present' : 'missing',
             'student_email' => $studentEmail,
             'has_session' => $request->session()->has('student_email'),
         ]);
@@ -57,24 +62,36 @@ class DashboardController extends Controller
         }
 
         // Upcoming: events student registered for with date >= today
+        // Filter by student_token if available, otherwise fallback to email (backward compatibility)
         $upcomingRegistrations = collect();
         if (!$selectedSection || $selectedSection === 'upcoming') {
             try {
-                $upcomingRegistrations = Registration::where('student_email', $studentEmail)
-                    ->with('event')
+                $query = Registration::with('event')
                     ->whereHas('event', function ($query) {
                         $query->whereDate('end_date', '>=', now()->toDateString());
-                    })
-                    ->orderBy('registered_at', 'desc')
-                    ->get();
+                    });
+                
+                // Filter by token if available (primary method), otherwise by email (backward compatibility)
+                if ($studentToken) {
+                    $query->where('student_token', $studentToken);
+                } elseif ($studentEmail) {
+                    $query->where('student_email', $studentEmail);
+                } else {
+                    // No identifier available - return empty collection
+                    $query->whereRaw('1 = 0'); // Force empty result
+                }
+                
+                $upcomingRegistrations = $query->orderBy('registered_at', 'desc')->get();
                     
                 \Log::info('Fetched upcoming registrations', [
+                    'student_token' => $studentToken ? 'present' : 'missing',
                     'student_email' => $studentEmail,
                     'count' => $upcomingRegistrations->count(),
                     'registration_ids' => $upcomingRegistrations->pluck('id')->toArray(),
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error fetching upcoming registrations', [
+                    'student_token' => $studentToken,
                     'student_email' => $studentEmail,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -83,24 +100,36 @@ class DashboardController extends Controller
         }
 
         // History: past events student registered for
+        // Filter by student_token if available, otherwise fallback to email (backward compatibility)
         $historyRegistrations = collect();
         if (!$selectedSection || $selectedSection === 'history') {
             try {
-                $historyRegistrations = Registration::where('student_email', $studentEmail)
-                    ->with('event')
+                $query = Registration::with('event')
                     ->whereHas('event', function ($query) {
                         $query->whereDate('end_date', '<', now()->toDateString());
-                    })
-                    ->orderBy('registered_at', 'desc')
-                    ->get();
+                    });
+                
+                // Filter by token if available (primary method), otherwise by email (backward compatibility)
+                if ($studentToken) {
+                    $query->where('student_token', $studentToken);
+                } elseif ($studentEmail) {
+                    $query->where('student_email', $studentEmail);
+                } else {
+                    // No identifier available - return empty collection
+                    $query->whereRaw('1 = 0'); // Force empty result
+                }
+                
+                $historyRegistrations = $query->orderBy('registered_at', 'desc')->get();
                     
                 \Log::info('Fetched history registrations', [
+                    'student_token' => $studentToken ? 'present' : 'missing',
                     'student_email' => $studentEmail,
                     'count' => $historyRegistrations->count(),
                     'registration_ids' => $historyRegistrations->pluck('id')->toArray(),
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error fetching history registrations', [
+                    'student_token' => $studentToken,
                     'student_email' => $studentEmail,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -109,10 +138,19 @@ class DashboardController extends Controller
         }
 
         // Certificates: certificates issued to this student
+        // Filter by student_token if available, otherwise fallback to email (backward compatibility)
         $certificates = collect();
         if (!$selectedSection || $selectedSection === 'certificates') {
-            $certificates = Certificate::whereHas('registration', function ($query) use ($studentEmail) {
-                    $query->where('student_email', $studentEmail);
+            $certificates = Certificate::whereHas('registration', function ($query) use ($studentToken, $studentEmail) {
+                    // Filter by token if available (primary method), otherwise by email (backward compatibility)
+                    if ($studentToken) {
+                        $query->where('student_token', $studentToken);
+                    } elseif ($studentEmail) {
+                        $query->where('student_email', $studentEmail);
+                    } else {
+                        // No identifier available - return empty collection
+                        $query->whereRaw('1 = 0'); // Force empty result
+                    }
                 })
                 ->where('is_revoked', false)
                 ->with(['registration', 'event'])
@@ -156,10 +194,22 @@ class DashboardController extends Controller
                 return redirect()->back()->with('error', 'Registration for this event has closed.');
             }
 
-            // Check if already registered
-            $existingRegistration = Registration::where('event_id', $id)
-                ->where('student_email', $request->student_email)
-                ->first();
+            // Get student token from header/session
+            $studentToken = StudentTokenHelper::getToken($request);
+            
+            // Check if already registered - check by token if available, otherwise by email
+            $existingRegistration = null;
+            if ($studentToken) {
+                // Primary check: by token + event (prevents duplicate registration per student)
+                $existingRegistration = Registration::where('event_id', $id)
+                    ->where('student_token', $studentToken)
+                    ->first();
+            } else {
+                // Fallback: by email (backward compatibility)
+                $existingRegistration = Registration::where('event_id', $id)
+                    ->where('student_email', $request->student_email)
+                    ->first();
+            }
 
             if ($existingRegistration) {
                 return redirect()->back()->with('error', 'You are already registered for this event.');
@@ -173,13 +223,14 @@ class DashboardController extends Controller
 
             $qrCode = null;
 
-            // Create registration
+            // Create registration with student token
             $registration = Registration::create([
                 'event_id' => $event->id,
                 'student_name' => $request->student_name,
                 'student_email' => $request->student_email,
                 'student_phone' => $request->student_phone,
                 'student_id' => $request->student_roll,
+                'student_token' => $studentToken, // Store token from college portal
                 'payment_status' => $event->is_paid ? 'pending' : 'paid', // For free events, mark as paid
                 'attendance_status' => 'pending', // Default to pending, will be marked present when scanned
                 'registered_at' => now(),
@@ -262,6 +313,9 @@ class DashboardController extends Controller
 
     public function show($id, Request $request)
     {
+        // Get student token from header/session
+        $studentToken = StudentTokenHelper::getToken($request);
+        
         // Get student info from session (will be empty if not set)
         $studentEmail = $request->session()->get('student_email', '');
         $studentName = $request->session()->get('student_name', '');
@@ -269,9 +323,13 @@ class DashboardController extends Controller
 
         $event = Event::findOrFail($id);
         
-        // Check if already registered - check by email from session
+        // Check if already registered - check by token if available, otherwise by email
         $existingRegistration = null;
-        if ($studentEmail) {
+        if ($studentToken) {
+            $existingRegistration = Registration::where('event_id', $id)
+                ->where('student_token', $studentToken)
+                ->first();
+        } elseif ($studentEmail) {
             $existingRegistration = Registration::where('event_id', $id)
                 ->where('student_email', $studentEmail)
                 ->first();
@@ -292,9 +350,9 @@ class DashboardController extends Controller
 
         $event->seats_remaining = max(0, $event->capacity - $event->registrations_count);
         
+        // For students: only brochure is visible. Approval/attachment is admin-only.
         $pdfCount = 0;
         if($event->brochure_path) $pdfCount++;
-        if($event->attachment_path) $pdfCount++;
 
         return view('student.events.show', compact('event', 'existingRegistration', 'studentEmail', 'studentName', 'studentRoll', 'pdfCount'));
     }
@@ -385,9 +443,18 @@ class DashboardController extends Controller
     {
         $certificate = Certificate::with(['registration', 'event'])->findOrFail($id);
         
-        // Verify student owns this certificate
+        // Verify student owns this certificate - check by token if available, otherwise by email
+        $studentToken = StudentTokenHelper::getToken($request);
         $studentEmail = session('student_email');
-        if (!$studentEmail || $certificate->registration->student_email !== $studentEmail) {
+        
+        $isAuthorized = false;
+        if ($studentToken && $certificate->registration->student_token === $studentToken) {
+            $isAuthorized = true;
+        } elseif ($studentEmail && $certificate->registration->student_email === $studentEmail) {
+            $isAuthorized = true;
+        }
+        
+        if (!$isAuthorized) {
             abort(403, 'Unauthorized access to certificate.');
         }
         

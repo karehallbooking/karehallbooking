@@ -1,21 +1,26 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Helpers\FacultyTokenHelper;
+use App\Mail\NewBookingNotification;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\NewBookingNotification;
 
 class UserEventController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
+        $facultyToken = FacultyTokenHelper::requireToken($request);
         $today = now()->toDateString();
-        $total = DB::table('events')->count();
-        $pending = DB::table('events')->where('status', 'pending')->count();
-        $approved = DB::table('events')->where('status', 'approved')->count();
-        $upcoming = DB::table('events')->whereDate('event_date', '>=', $today)->count();
+
+        $baseQuery = DB::table('events')->where('faculty_token', $facultyToken);
+
+        $total = (clone $baseQuery)->count();
+        $pending = (clone $baseQuery)->where('status', 'pending')->count();
+        $approved = (clone $baseQuery)->where('status', 'approved')->count();
+        $upcoming = (clone $baseQuery)->whereDate('event_date', '>=', $today)->count();
 
         $stats = compact('total', 'pending', 'approved', 'upcoming');
 
@@ -172,6 +177,9 @@ class UserEventController extends Controller
             $letterPath = $request->file('approval_letter')->store('letters', 'public');
         }
 
+        // Token from college portal identifies the faculty member who owns this booking
+        $facultyToken = FacultyTokenHelper::requireToken($request);
+
         $event = Event::create([
             'hall_name' => $request->hall_name,
             'event_date' => $request->event_date,
@@ -183,6 +191,7 @@ class UserEventController extends Controller
             'organizer_phone' => $request->organizer_phone,
             'organizer_department' => $request->organizer_department,
             'organizer_designation' => $request->organizer_designation,
+            'faculty_token' => $facultyToken,
             'purpose' => $request->purpose,
             'seating_capacity' => $request->seating_capacity,
             'facilities_required' => $request->facilities_required ?? [],
@@ -227,7 +236,11 @@ class UserEventController extends Controller
 
     public function myBookings(Request $request)
     {
-        $query = DB::table('events')->orderByDesc('created_at');
+        $facultyToken = FacultyTokenHelper::requireToken($request);
+
+        $query = DB::table('events')
+            ->where('faculty_token', $facultyToken)
+            ->orderByDesc('created_at');
 
         if ($request->filled('status')) {
             $status = $request->status;
@@ -252,6 +265,8 @@ class UserEventController extends Controller
 
     public function checkAvailability(Request $request)
     {
+        FacultyTokenHelper::requireToken($request);
+
         $request->validate([
             'hall_name' => 'required|string',
             'event_date' => 'required|date',
@@ -271,11 +286,14 @@ class UserEventController extends Controller
         ]);
     }
 
-    public function cancelRequests()
+    public function cancelRequests(Request $request)
     {
+        $facultyToken = FacultyTokenHelper::requireToken($request);
+
         $requests = \DB::table('cancel_requests')
             ->join('events', 'cancel_requests.event_id', '=', 'events.id')
             ->select('cancel_requests.*', 'events.hall_name', 'events.event_date')
+            ->where('events.faculty_token', $facultyToken)
             ->orderByDesc('cancel_requests.created_at')
             ->get();
         return view('kare.cancel-requests', compact('requests'));

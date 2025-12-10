@@ -90,9 +90,9 @@
                             @endif
                         </p>
                         @php
+                            // For students: show only brochure, approval/attachment is admin-only
                             $pdfCount = 0;
                             if($event->brochure_path) $pdfCount++;
-                            if($event->attachment_path) $pdfCount++;
                         @endphp
                         @if($pdfCount > 0)
                             <p style="margin-top: 12px; margin-bottom: 8px;">
@@ -101,9 +101,6 @@
                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 @if($event->brochure_path)
                                     <a href="#" onclick="event.stopPropagation(); openPdfModal('{{ route('student.events.brochure', $event->id) }}', 'Event Brochure'); return false;" class="pdf-link-simple">📑 View Brochure</a>
-                                @endif
-                                @if($event->attachment_path)
-                                    <a href="#" onclick="event.stopPropagation(); openPdfModal('{{ route('student.events.attachment', $event->id) }}', 'Event Attachment'); return false;" class="pdf-link-simple">📑 View Attachment</a>
                                 @endif
                             </div>
                         @endif

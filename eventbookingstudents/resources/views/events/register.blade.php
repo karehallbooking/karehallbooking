@@ -173,7 +173,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const payBtn = document.getElementById('pay-btn');
@@ -203,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             showLoading();
 
-            // Create Razorpay order
+            // Create BillDesk order
             fetch('{{ route("events.createOrder", $event->id) }}', {
                 method: 'POST',
                 headers: {
@@ -232,65 +231,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                // Initialize Razorpay Checkout
-                var options = {
-                    key: data.razorpay_key,
-                    amount: data.amount,
-                    currency: data.currency,
-                    name: "Kalasalingam Academy",
-                    description: "Registration for " + data.event_name,
-                    order_id: data.order_id,
-                    prefill: {
-                        name: data.student_name,
-                        email: data.student_email,
-                        contact: data.student_phone || ""
-                    },
-                    theme: {
-                        color: "#0b5ed7"
-                    },
-                    handler: function (rzpResponse) {
-                        showLoading();
+                // Build and submit BillDesk form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = data.endpoint;
+                form.style.display = 'none';
 
-                        // Send payment response to server for verification
-                        fetch('{{ route("payment.success.post") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                razorpay_order_id: rzpResponse.razorpay_order_id,
-                                razorpay_payment_id: rzpResponse.razorpay_payment_id,
-                                razorpay_signature: rzpResponse.razorpay_signature
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(function(responseData) {
-                            hideLoading();
-                            if (responseData.success && responseData.redirect_url) {
-                                window.location.href = responseData.redirect_url;
-                            } else {
-                                alert(responseData.message || 'Payment verification failed. Please contact support.');
-                                window.location.href = '{{ route("payment.failure") }}';
-                            }
-                        })
-                        .catch(function(err) {
-                            hideLoading();
-                            console.error('Payment verification error:', err);
-                            window.location.href = '{{ route("payment.failure") }}';
-                        });
-                    },
-                    modal: {
-                        ondismiss: function() {
-                            hideLoading();
-                            // User closed the modal
-                        }
-                    }
-                };
+                Object.entries(data.fields || {}).forEach(([key, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                });
 
-                var rzp = new Razorpay(options);
-                rzp.open();
+                document.body.appendChild(form);
+                form.submit();
             })
             .catch(function(err) {
                 hideLoading();

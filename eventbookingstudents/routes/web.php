@@ -56,11 +56,10 @@ Route::get('/student/certificates/{id}', [DashboardController::class, 'viewCerti
 // Ticket Viewing (Inline)
 Route::get('/student/registrations/{id}/ticket', [\App\Http\Controllers\Student\TicketController::class, 'show'])->name('student.ticket.show');
 
-// Razorpay Payment Routes
+// Payment Routes (BillDesk)
 Route::get('/events/{event}/register', [\App\Http\Controllers\EventRegistrationController::class, 'showRegisterPage'])->name('events.register');
 Route::post('/events/{event}/create-order', [\App\Http\Controllers\EventRegistrationController::class, 'createOrderForEvent'])->name('events.createOrder');
-Route::post('/payment/success', [\App\Http\Controllers\PaymentController::class, 'handlePaymentSuccess'])->name('payment.success.post');
+Route::post('/payment/billdesk/callback', [\App\Http\Controllers\PaymentController::class, 'billdeskCallback'])->name('payment.billdesk.callback')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
 Route::get('/payment/success', [\App\Http\Controllers\PaymentController::class, 'successPage'])->name('payment.success');
 Route::get('/payment/failure', [\App\Http\Controllers\PaymentController::class, 'failurePage'])->name('payment.failure');
-Route::post('/webhooks/razorpay/payment', [\App\Http\Controllers\PaymentController::class, 'handleWebhook'])->name('razorpay.webhook')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
 

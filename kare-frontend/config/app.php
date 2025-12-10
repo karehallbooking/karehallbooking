@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Faculty Token Testing Flag
+    |--------------------------------------------------------------------------
+    |
+    | When true, a faculty_token query parameter/input can be used as a
+    | temporary token source for local testing. Keep disabled in production.
+    |
+    */
+
+    'allow_faculty_token_query_param' => env('ALLOW_FACULTY_TOKEN_QUERY_PARAM', false),
+
 ];
