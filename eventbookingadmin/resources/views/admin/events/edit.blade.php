@@ -151,7 +151,7 @@
         <div class="section-block" style="margin-top:16px;">
             <h3>Attendance Sessions (Date-wise)</h3>
             <p style="font-size: 13px; color:#4a5d78; margin-top:0;">
-                Date-wise attendance configuration for this event. Adjust session counts per day as needed.
+                Date-wise attendance configuration for this event. Adjust session counts per day as needed. Use <strong>0</strong> on days where attendance is not taken; at least one session is required overall.
             </p>
             <div id="attendance-sessions-edit-container">
                 @php
@@ -167,7 +167,7 @@
                                 <input type="text" value="{{ $date }}" readonly style="background:#f5f8ff;">
                             </label>
                             <label>Sessions on {{ $date }}
-                                <input type="number" name="attendance_sessions[{{ $date }}]" min="1" max="10" value="{{ $count }}" required>
+                                <input type="number" name="attendance_sessions[{{ $date }}]" min="0" max="10" value="{{ $count }}" required>
                             </label>
                         </div>
                     @endforeach
@@ -296,7 +296,7 @@
             while (current <= endDate) {
                 const iso = current.toISOString().split('T')[0];
                 const display = iso;
-                const value = existing[iso] || 1;
+                const value = (existing[iso] !== undefined) ? existing[iso] : 0;
 
                 const row = document.createElement('div');
                 row.className = 'form-row two-col';
@@ -307,7 +307,7 @@
                         '<input type=\"text\" value=\"' + display + '\" readonly style=\"background:#f5f8ff;\">' +
                     '</label>' +
                     '<label>Sessions on ' + display +
-                        '<input type=\"number\" name=\"attendance_sessions[' + iso + ']\" min=\"1\" max=\"10\" value=\"' + value + '\" required>' +
+                        '<input type=\"number\" name=\"attendance_sessions[' + iso + ']\" min=\"0\" max=\"10\" value=\"' + value + '\" required>' +
                     '</label>';
                 container.appendChild(row);
 

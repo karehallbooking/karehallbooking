@@ -38,12 +38,19 @@ class EventController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'capacity' => 'required|integer|min:1',
             'attendance_sessions' => 'required|array',
-            'attendance_sessions.*' => 'required|integer|min:1|max:10',
+            'attendance_sessions.*' => 'required|integer|min:0|max:10',
             'pricing_type' => 'required|in:free,paid',
             'amount' => 'nullable|numeric|min:0',
             'brochure_pdf' => 'nullable|mimes:pdf|max:10240',
             'attachment_pdf' => 'nullable|mimes:pdf|max:10240',
         ]);
+
+        $totalSessionsInput = collect($validated['attendance_sessions'])->map(fn ($count) => (int) $count)->sum();
+        if ($totalSessionsInput < 1) {
+            return back()
+                ->withErrors(['attendance_sessions' => 'Please set at least one attendance session across the selected dates.'])
+                ->withInput();
+        }
 
         $payload = collect($validated)->except(['pricing_type', 'brochure_pdf', 'attachment_pdf', 'attendance_sessions'])->toArray();
         $payload['is_paid'] = $validated['pricing_type'] === 'paid';
@@ -155,13 +162,20 @@ class EventController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'capacity' => 'required|integer|min:1',
             'attendance_sessions' => 'required|array',
-            'attendance_sessions.*' => 'required|integer|min:1|max:10',
+            'attendance_sessions.*' => 'required|integer|min:0|max:10',
             'pricing_type' => 'required|in:free,paid',
             'amount' => 'nullable|numeric|min:0',
             'brochure_pdf' => 'nullable|mimes:pdf|max:10240',
             'attachment_pdf' => 'nullable|mimes:pdf|max:10240',
             'status' => 'required|in:upcoming,ongoing,completed,cancelled',
         ]);
+
+        $totalSessionsInput = collect($validated['attendance_sessions'])->map(fn ($count) => (int) $count)->sum();
+        if ($totalSessionsInput < 1) {
+            return back()
+                ->withErrors(['attendance_sessions' => 'Please set at least one attendance session across the selected dates.'])
+                ->withInput();
+        }
 
         $payload = collect($validated)->except(['pricing_type', 'brochure_pdf', 'attachment_pdf', 'attendance_sessions'])->toArray();
         $payload['is_paid'] = $validated['pricing_type'] === 'paid';
